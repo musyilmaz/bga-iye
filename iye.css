@@ -90,6 +90,15 @@
   background-size: auto 100%;
 }
 
+.kam {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  background-image: url("img/kam.png");
+  background-size: auto 100%;
+  background-position-x: -288px;
+}
+
 .token[data-token-type="owl"] {
   background-position-x: 0px;
 }

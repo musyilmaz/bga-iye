@@ -171,7 +171,7 @@ define([
       const { game_state, kam, token_types } = gamedatas;
 
       game_state.map((token) => {
-        if (token.type !== kam.type && token.location === "board") {
+        if (token.location === "board") {
           this.placeTokenOnBoard(token);
         }
       });
@@ -180,12 +180,21 @@ define([
       const { x, y, type } = token;
       const tokens = document.getElementById("iye_tokens");
 
-      tokens.insertAdjacentHTML(
-        "beforeend",
-        `<div class="token" data-token-type="${type}" id="token_${x}_${y}"></div>`
-      );
+      if (type === "kam") {
+        tokens.insertAdjacentHTML(
+          "beforeend",
+          `<div class="kam" id="kam_${x}_${y}"></div>`
+        );
 
-      this.placeOnObject(`token_${x}_${y}`, `square_${x}_${y}`);
+        this.placeOnObject(`kam_${x}_${y}`, `square_${x}_${y}`);
+      } else {
+        tokens.insertAdjacentHTML(
+          "beforeend",
+          `<div class="token" data-token-type="${type}" id="token_${x}_${y}"></div>`
+        );
+
+        this.placeOnObject(`token_${x}_${y}`, `square_${x}_${y}`);
+      }
     },
 
     ///////////////////////////////////////////////////

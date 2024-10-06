@@ -28,8 +28,7 @@
 
 <div class="play_area_wrapper">
   <div id="iye_board">
-    <div id="iye_tokens">
-    </div>
+    <div id="iye_tokens"></div>
   </div>
 </div>
 
