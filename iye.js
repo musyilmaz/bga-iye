@@ -78,7 +78,7 @@ define([
         }
       }
 
-      this.setupTokensOnBoard();
+      this.setupTokensOnBoard(gamedatas.token_types);
 
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();
@@ -180,12 +180,22 @@ define([
       return `<div id="square_${x}_${y}" class="iye_square" style="left: ${left}px; top: ${top}px;"></div>`;
     },
 
-    setupTokensOnBoard: function () {
-      const sunTokens = Array(TOKENS.SUN.amount).fill(TOKENS.SUN.type);
-      const horseTokens = Array(TOKENS.HORSE.amount).fill(TOKENS.HORSE.type);
-      const treeTokens = Array(TOKENS.TREE.amount).fill(TOKENS.TREE.type);
-      const waterTokens = Array(TOKENS.WATER.amount).fill(TOKENS.WATER.type);
-      const owlTokens = Array(TOKENS.OWL.amount).fill(TOKENS.OWL.type);
+    setupTokensOnBoard: function (token_types) {
+      const sunTokens = Array(token_types.sun.amount).fill(
+        token_types.sun.type,
+      );
+      const horseTokens = Array(token_types["horse"].amount).fill(
+        token_types["horse"].type,
+      );
+      const treeTokens = Array(token_types["tree"].amount).fill(
+        token_types["tree"].type,
+      );
+      const waterTokens = Array(token_types["water"].amount).fill(
+        token_types["water"].type,
+      );
+      const owlTokens = Array(token_types["owl"].amount).fill(
+        token_types["owl"].amount,
+      );
 
       const tokens = [
         ...sunTokens,

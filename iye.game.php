@@ -191,7 +191,7 @@ class iye extends Table
             "SELECT player_id, player_score score FROM player"
         );
 
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
+        $result["token_types"] = $this->token_types;
 
         return $result;
     }
