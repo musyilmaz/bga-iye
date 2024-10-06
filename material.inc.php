@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
@@ -69,9 +70,6 @@ $this->kam = [
   "type" => "kam",
   "name" => clientTranslate("kam"),
   "tooltip" => clientTranslate("TOOLTIP: kam information"),
+  "start_x" => 2,
+  "start_y" => 2,
 ];
-
-
-
-
-

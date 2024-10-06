@@ -35,9 +35,10 @@
 
 
 CREATE TABLE IF NOT EXISTS `token` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `type` varchar(16) NOT NULL,
   `location` varchar(16) NOT NULL,
   `x` smallint(5),
   `y` smallint(5),
-  PRIMARY KEY (`type`, `location`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

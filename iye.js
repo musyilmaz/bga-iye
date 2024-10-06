@@ -15,11 +15,6 @@
  *
  */
 
-const BOARD = {
-  COLS: { size: 5 },
-  ROWS: { size: 5 },
-};
-
 define([
   "dojo",
   "dojo/_base/declare",
@@ -53,8 +48,8 @@ define([
       console.log("❗ gamedatas:", gamedatas);
 
       // Setting up player boards
-      for (var player_id in gamedatas.players) {
-        var player = gamedatas.players[player_id];
+      for (let player_id in gamedatas.players) {
+        const player = gamedatas.players[player_id];
 
         // TODO: Setting up players boards if needed
       }
@@ -62,8 +57,8 @@ define([
       // TODO: Set up your game interface here, according to "gamedatas"
       const gameboard = document.getElementById("iye_board");
 
-      for (let x = 1; x <= BOARD.COLS.size; x++) {
-        for (let y = 1; y <= BOARD.ROWS.size; y++) {
+      for (let x = 0; x <= gamedatas.board.column.size - 1; x++) {
+        for (let y = 0; y <= gamedatas.board.row.size - 1; y++) {
           gameboard.insertAdjacentHTML(
             `afterbegin`,
             this.getSquareElement(x, y)
@@ -71,7 +66,7 @@ define([
         }
       }
 
-      this.setupTokensOnBoard(gamedatas.tokens);
+      this.setupTokensOnBoard(gamedatas);
 
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();
@@ -167,41 +162,20 @@ define([
       const horizontal = { scale: 140, offset: 191 };
       const vertical = { scale: 139, offset: 18 };
 
-      const left = Math.round((x - 1) * horizontal.scale + horizontal.offset);
-      const top = Math.round((y - 1) * vertical.scale + vertical.offset);
+      const left = Math.round(x * horizontal.scale + horizontal.offset);
+      const top = Math.round(y * vertical.scale + vertical.offset);
 
       return `<div id="square_${x}_${y}" class="iye_square" style="left: ${left}px; top: ${top}px;"></div>`;
     },
+    setupTokensOnBoard: function (gamedatas) {
+      const { game_state, kam, token_types } = gamedatas;
 
-    setupTokensOnBoard: function (tokens) {
-      const sunTokens = Array(tokens.sun.amount).fill(tokens.sun.type);
-      const horseTokens = Array(tokens.horse.amount).fill(tokens.horse.type);
-      const treeTokens = Array(tokens.tree.amount).fill(tokens.tree.type);
-      const waterTokens = Array(tokens.water.amount).fill(tokens.water.type);
-      const owlTokens = Array(tokens.owl.amount).fill(tokens.owl.amount);
-
-      const shuffledTokensWithPos = [
-        ...sunTokens,
-        ...horseTokens,
-        ...treeTokens,
-        ...waterTokens,
-        ...owlTokens,
-      ]
-        .map((val) => ({
-          val,
-          sort: Math.random(),
-        }))
-        .sort((a, b) => a.sort - b.sort)
-        .map(({ val }, index) => {
-          return {
-            type: val,
-            x: (index % BOARD.COLS.size) + 1,
-            y: Math.floor(index / BOARD.COLS.size + 1),
-          };
-        })
-        .map((token) => this.placeTokenOnBoard(token));
+      game_state.map((token) => {
+        if (token.type !== kam.type && token.location === "board") {
+          this.placeTokenOnBoard(token);
+        }
+      });
     },
-
     placeTokenOnBoard: function (token) {
       const { x, y, type } = token;
       const tokens = document.getElementById("iye_tokens");

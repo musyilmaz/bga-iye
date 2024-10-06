@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
@@ -14,6 +15,7 @@
  *
  * In this PHP file, you are going to defines the rules of the game.
  */
+
 declare(strict_types=1);
 
 require_once(APP_GAMEMODULE_PATH . "module/table/table.game.php");
@@ -126,13 +128,14 @@ class iye extends Table
      *
      * The action method of state `nextPlayer` is called everytime the current game state is set to `nextPlayer`.
      */
-    public function stNextPlayer(): void {
+    public function stNextPlayer(): void
+    {
         // Retrieve the active player ID.
         $player_id = (int)$this->getActivePlayerId();
 
         // Give some extra time to the active player when he completed an action
         $this->giveExtraTime($player_id);
-        
+
         $this->activeNextPlayer();
 
         // Go to another gamestate
@@ -153,21 +156,21 @@ class iye extends Table
      */
     public function upgradeTableDb($from_version)
     {
-//       if ($from_version <= 1404301345)
-//       {
-//            // ! important ! Use DBPREFIX_<table_name> for all tables
-//
-//            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
-//            $this->applyDbUpgradeToAllDB( $sql );
-//       }
-//
-//       if ($from_version <= 1405061421)
-//       {
-//            // ! important ! Use DBPREFIX_<table_name> for all tables
-//
-//            $sql = "CREATE TABLE DBPREFIX_xxxxxxx ....";
-//            $this->applyDbUpgradeToAllDB( $sql );
-//       }
+        //       if ($from_version <= 1404301345)
+        //       {
+        //            // ! important ! Use DBPREFIX_<table_name> for all tables
+        //
+        //            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
+        //            $this->applyDbUpgradeToAllDB( $sql );
+        //       }
+        //
+        //       if ($from_version <= 1405061421)
+        //       {
+        //            // ! important ! Use DBPREFIX_<table_name> for all tables
+        //
+        //            $sql = "CREATE TABLE DBPREFIX_xxxxxxx ....";
+        //            $this->applyDbUpgradeToAllDB( $sql );
+        //       }
     }
 
     /*
@@ -191,9 +194,10 @@ class iye extends Table
             "SELECT player_id, player_score score FROM player"
         );
 
-        $result["tokens"] = $this->token_types;
+        $result["token_types"] = $this->token_types;
         $result["kam"] = $this->kam;
         $result["board"] = $this->board;
+        $result["game_state"] = self::getObjectListFromDB("SELECT type type, location location, x x, y y FROM token");
 
         return $result;
     }
@@ -256,11 +260,42 @@ class iye extends Table
         // Dummy content.
         // $this->initStat("table", "table_teststat1", 0);
         // $this->initStat("player", "player_teststat1", 0);
+        $sql_values = $this->setupInitialTokens();
 
-        // TODO: Setup the initial game situation here.
+        $sql = "INSERT INTO token (type, location, x, y) VALUES ";
+        $sql .= implode(",", $sql_values);
+        $this->DbQuery($sql);
 
         // Activate first player once everything has been initialized and ready.
         $this->activeNextPlayer();
+    }
+
+    protected function setupInitialTokens()
+    {
+        $tokens = array();
+        $sql_values = array();
+
+        foreach (array_keys($this->token_types) as $token_type) {
+            $amount = $this->token_types[$token_type]["amount"];
+            $type = $this->token_types[$token_type]["type"];
+            array_push($tokens, ...array_fill(0, $amount, $type));
+        }
+
+        shuffle($tokens);
+
+        foreach ($tokens as $index => $token) {
+            $x = $index % $this->board["row"]["size"];
+            $y = floor($index / $this->board["column"]["size"]);
+            $sql_values[] = "('$token', 'board', $x, $y)";
+        };
+
+        $kam_type = $this->kam["type"];
+        $kam_start_x = $this->kam["start_x"];
+        $kam_start_y = $this->kam["start_y"];
+
+        $sql_values[] = "('$kam_type', 'board', $kam_start_x, $kam_start_y)";
+
+        return $sql_values;
     }
 
     /**
@@ -285,11 +320,10 @@ class iye extends Table
 
         if ($state["type"] === "activeplayer") {
             switch ($state_name) {
-                default:
-                {
-                    $this->gamestate->nextState("zombiePass");
-                    break;
-                }
+                default: {
+                        $this->gamestate->nextState("zombiePass");
+                        break;
+                    }
             }
 
             return;
