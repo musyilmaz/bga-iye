@@ -1,0 +1,10 @@
+{
+    "name": "bga-iye",
+    "devDependencies": {
+        "@prettier/plugin-php": "^0.19.1",
+        "prettier": "^2.7.1"
+      },
+      "prettier": {
+        "braceStyle": "1tbs"
+      }
+}

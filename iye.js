@@ -20,14 +20,6 @@ const BOARD = {
   ROWS: { size: 5 },
 };
 
-const TOKENS = {
-  SUN: { type: "sun", amount: 9 },
-  HORSE: { type: "horse", amount: 7 },
-  TREE: { type: "tree", amount: 5 },
-  WATER: { type: "water", amount: 3 },
-  OWL: { type: "owl", amount: 1 },
-};
-
 define([
   "dojo",
   "dojo/_base/declare",
@@ -58,6 +50,7 @@ define([
 
     setup: function (gamedatas) {
       console.log("Starting game setup");
+      console.log("❗ gamedatas:", gamedatas);
 
       // Setting up player boards
       for (var player_id in gamedatas.players) {
@@ -73,12 +66,12 @@ define([
         for (let y = 1; y <= BOARD.ROWS.size; y++) {
           gameboard.insertAdjacentHTML(
             `afterbegin`,
-            this.getSquareElement(x, y),
+            this.getSquareElement(x, y)
           );
         }
       }
 
-      this.setupTokensOnBoard(gamedatas.token_types);
+      this.setupTokensOnBoard(gamedatas.tokens);
 
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();
@@ -149,8 +142,8 @@ define([
               this.addActionButton(
                 `actPlayCard${cardId}-btn`,
                 _("Play card with id ${card_id}").replace("${card_id}", cardId),
-                () => this.onCardClick(cardId),
-              ),
+                () => this.onCardClick(cardId)
+              )
             );
 
             this.addActionButton(
@@ -159,7 +152,7 @@ define([
               () => this.bgaPerformAction("actPass"),
               null,
               null,
-              "gray",
+              "gray"
             );
             break;
         }
@@ -180,32 +173,20 @@ define([
       return `<div id="square_${x}_${y}" class="iye_square" style="left: ${left}px; top: ${top}px;"></div>`;
     },
 
-    setupTokensOnBoard: function (token_types) {
-      const sunTokens = Array(token_types.sun.amount).fill(
-        token_types.sun.type,
-      );
-      const horseTokens = Array(token_types["horse"].amount).fill(
-        token_types["horse"].type,
-      );
-      const treeTokens = Array(token_types["tree"].amount).fill(
-        token_types["tree"].type,
-      );
-      const waterTokens = Array(token_types["water"].amount).fill(
-        token_types["water"].type,
-      );
-      const owlTokens = Array(token_types["owl"].amount).fill(
-        token_types["owl"].amount,
-      );
+    setupTokensOnBoard: function (tokens) {
+      const sunTokens = Array(tokens.sun.amount).fill(tokens.sun.type);
+      const horseTokens = Array(tokens.horse.amount).fill(tokens.horse.type);
+      const treeTokens = Array(tokens.tree.amount).fill(tokens.tree.type);
+      const waterTokens = Array(tokens.water.amount).fill(tokens.water.type);
+      const owlTokens = Array(tokens.owl.amount).fill(tokens.owl.amount);
 
-      const tokens = [
+      const shuffledTokensWithPos = [
         ...sunTokens,
         ...horseTokens,
         ...treeTokens,
         ...waterTokens,
         ...owlTokens,
-      ];
-
-      const shuffledTokensWithPos = tokens
+      ]
         .map((val) => ({
           val,
           sort: Math.random(),
@@ -227,7 +208,7 @@ define([
 
       tokens.insertAdjacentHTML(
         "beforeend",
-        `<div class="token" data-token-type="${type}" id="token_${x}_${y}"></div>`,
+        `<div class="token" data-token-type="${type}" id="token_${x}_${y}"></div>`
       );
 
       this.placeOnObject(`token_${x}_${y}`, `square_${x}_${y}`);

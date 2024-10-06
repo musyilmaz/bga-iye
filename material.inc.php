@@ -18,43 +18,57 @@
  * are available everywhere in your game logic code.
  *
  */
+$this->board = [
+  "row" => [
+    "size" => 5
+  ],
+  "column" => [
+    "size" => 5
+  ]
+];
 
 $this->token_types = [
-    "sun" => [
-      "type" => "sun",
-      "name" => clientTranslate("sun"),
-      "tooltip" => clientTranslate("TOOLTIP: sun information"),
-      "amount" => 9,
-      "points" => 1
-    ],
-    "horse" => [
-      "type" => "horse",
-      "name" => clientTranslate("horse"),
-      "tooltip" => clientTranslate("TOOLTIP: horse information"),
-      "amount" => 7,
-      "points" => 3
-    ],
-    "tree" => [
-      "type" => "tree",
-      "name" => clientTranslate("tree"),
-      "tooltip" => clientTranslate("TOOLTIP: tree information"),
-      "amount" => 5,
-      "points" => 5
-    ],
-    "water" => [
-      "type" => "water",
-      "name" => clientTranslate("water"),
-      "tooltip" => clientTranslate("TOOLTIP: water information"),
-      "amount" => 3,
-      "points" => 7
-    ],
-    "owl" => [
-      "type" => "owl",
-      "name" => clientTranslate("owl"),
-      "tooltip" => clientTranslate("TOOLTIP: owl information"),
-      "amount" => 1,
-      "points" => 9
-    ],
+  "sun" => [
+    "type" => "sun",
+    "name" => clientTranslate("sun"),
+    "tooltip" => clientTranslate("TOOLTIP: sun information"),
+    "amount" => 9,
+    "points" => 1
+  ],
+  "horse" => [
+    "type" => "horse",
+    "name" => clientTranslate("horse"),
+    "tooltip" => clientTranslate("TOOLTIP: horse information"),
+    "amount" => 7,
+    "points" => 3
+  ],
+  "tree" => [
+    "type" => "tree",
+    "name" => clientTranslate("tree"),
+    "tooltip" => clientTranslate("TOOLTIP: tree information"),
+    "amount" => 5,
+    "points" => 5
+  ],
+  "water" => [
+    "type" => "water",
+    "name" => clientTranslate("water"),
+    "tooltip" => clientTranslate("TOOLTIP: water information"),
+    "amount" => 3,
+    "points" => 7
+  ],
+  "owl" => [
+    "type" => "owl",
+    "name" => clientTranslate("owl"),
+    "tooltip" => clientTranslate("TOOLTIP: owl information"),
+    "amount" => 1,
+    "points" => 9
+  ],
+];
+
+$this->kam = [
+  "type" => "kam",
+  "name" => clientTranslate("kam"),
+  "tooltip" => clientTranslate("TOOLTIP: kam information"),
 ];
 
 

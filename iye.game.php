@@ -191,7 +191,9 @@ class iye extends Table
             "SELECT player_id, player_score score FROM player"
         );
 
-        $result["token_types"] = $this->token_types;
+        $result["tokens"] = $this->token_types;
+        $result["kam"] = $this->kam;
+        $result["board"] = $this->board;
 
         return $result;
     }
