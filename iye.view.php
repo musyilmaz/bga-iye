@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
@@ -24,7 +25,7 @@
  *
  */
 
-require_once( APP_BASE_PATH."view/common/game.view.php" );
+require_once(APP_BASE_PATH . "view/common/game.view.php");
 
 /**
  * @property iye $game
@@ -43,8 +44,18 @@ class view_iye_iye extends game_view
     /**
      * Main view function.
      */
-  	public function build_page($viewArgs)
-  	{
-        //
-  	}
+    public function build_page($viewArgs)
+    {
+        $this->page->begin_block("iye_iye", "token_zone");
+        $this->page->begin_block("iye_iye", "player");
+        $players = $this->game->players;
+
+        foreach ($players as $player_id => $player) {
+            $this->page->insert_block('player', array(
+                'PLAYER_ID' => $player_id,
+                'PLAYER_NAME' => $player["player_name"],
+                'PLAYER_COLOR' => $player["player_color"]
+            ));
+        }
+    }
 }

@@ -50,8 +50,6 @@ define([
       // Setting up player boards
       for (let player_id in gamedatas.players) {
         const player = gamedatas.players[player_id];
-
-        // TODO: Setting up players boards if needed
       }
 
       // TODO: Set up your game interface here, according to "gamedatas"

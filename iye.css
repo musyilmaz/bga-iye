@@ -66,7 +66,70 @@
 
 .play_area_wrapper {
   display: flex;
-  justify-content: center;
+  margin: 0 auto;
+  height: 800px;
+  width: 1200px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#player_zone_wrapper {
+  width: 400px;
+  height: 720px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.player_board {
+  height: 140px;
+  position: relative;
+  padding-top: 60px;
+}
+
+.player_board > .player_name {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-weight: bold;
+}
+
+.token_zone {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
+  height: 80px;
+}
+
+.token_zone > .player_token {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  background-image: url("img/tokens.jpg");
+  background-size: auto 100%;
+  opacity: 0.3;
+}
+
+.token_zone > .player_token[data-token-type="owl"] {
+  background-position-x: 0px;
+}
+
+.token_zone > .player_token[data-token-type="water"] {
+  background-position-x: -60px;
+}
+
+.token_zone > .player_token[data-token-type="tree"] {
+  background-position-x: -120px;
+}
+
+.token_zone > .player_token[data-token-type="horse"] {
+  background-position-x: -180px;
+}
+
+.token_zone > .player_token[data-token-type="sun"] {
+  background-position-x: -240px;
 }
 
 #iye_board {

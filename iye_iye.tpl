@@ -25,8 +25,25 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
-
 <div class="play_area_wrapper">
+  <div id="player_zone_wrapper">
+    <!-- BEGIN player -->
+      <div id="player_{PLAYER_ID}" class="player_board whiteblock">
+        <div class="player_name" style="color: #{PLAYER_COLOR}">
+          {PLAYER_NAME}
+        </div>
+        <!-- BEGIN token_zone -->
+          <div class="token_zone">
+            <div class="player_token" data-token-type="sun"></div>
+            <div class="player_token" data-token-type="horse"></div>
+            <div class="player_token" data-token-type="tree"></div>
+            <div class="player_token" data-token-type="water"></div>
+            <div class="player_token" data-token-type="owl"></div>
+          </div>
+        <!-- END token_zone -->
+      </div>
+    <!-- END player -->
+  </div>
   <div id="iye_board">
     <div id="iye_tokens"></div>
   </div>
