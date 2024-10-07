@@ -71,9 +71,11 @@
 
 #iye_board {
   position: relative;
-  width: 1071px;
+  width: 720px;
   height: 720px;
   background-image: url("img/gameboard.jpg");
+  background-size: auto 100%;
+  background-position-x: -175px;
 }
 
 .iye_square {

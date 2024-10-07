@@ -28,7 +28,7 @@ $this->board = [
   ],
   "horizontal" => [
     "scale" => 140,
-    "offset" => 191,
+    "offset" => 17,
   ],
   "vertical" => [
     "scale" => 139,
