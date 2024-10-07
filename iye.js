@@ -55,17 +55,8 @@ define([
       }
 
       // TODO: Set up your game interface here, according to "gamedatas"
-      const gameboard = document.getElementById("iye_board");
 
-      for (let x = 0; x <= gamedatas.board.column.size - 1; x++) {
-        for (let y = 0; y <= gamedatas.board.row.size - 1; y++) {
-          gameboard.insertAdjacentHTML(
-            `afterbegin`,
-            this.getSquareElement(x, y)
-          );
-        }
-      }
-
+      this.setupGameBoard(gamedatas.board);
       this.setupTokensOnBoard(gamedatas);
 
       // Setup game notifications to handle (see "setupNotifications" method below)
@@ -157,18 +148,27 @@ define([
     ///////////////////////////////////////////////////
     //// Utility methods
     ///////////////////////////////////////////////////
-    getSquareElement: function (x, y) {
-      // Horizontal and Vertical spacing values from gameboard 1071x720px version
-      const horizontal = { scale: 140, offset: 191 };
-      const vertical = { scale: 139, offset: 18 };
-
-      const left = Math.round(x * horizontal.scale + horizontal.offset);
-      const top = Math.round(y * vertical.scale + vertical.offset);
-
+    getSquareElement: function (x, y, left, top) {
       return `<div id="square_${x}_${y}" class="iye_square" style="left: ${left}px; top: ${top}px;"></div>`;
     },
+    setupGameBoard: function (board) {
+      const gameboard = document.getElementById("iye_board");
+      const { row, column, horizontal, vertical } = board;
+
+      for (let x = 0; x <= column.size - 1; x++) {
+        for (let y = 0; y <= row.size - 1; y++) {
+          const left = Math.round(x * horizontal.scale + horizontal.offset);
+          const top = Math.round(y * vertical.scale + vertical.offset);
+
+          gameboard.insertAdjacentHTML(
+            `afterbegin`,
+            this.getSquareElement(x, y, left, top)
+          );
+        }
+      }
+    },
     setupTokensOnBoard: function (gamedatas) {
-      const { game_state, kam, token_types } = gamedatas;
+      const { game_state } = gamedatas;
 
       game_state.map((token) => {
         if (token.location === "board") {

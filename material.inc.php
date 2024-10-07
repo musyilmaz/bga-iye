@@ -25,6 +25,14 @@ $this->board = [
   ],
   "column" => [
     "size" => 5
+  ],
+  "horizontal" => [
+    "scale" => 140,
+    "offset" => 191,
+  ],
+  "vertical" => [
+    "scale" => 139,
+    "offset" => 18
   ]
 ];
 
