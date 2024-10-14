@@ -54,7 +54,7 @@ define([
 
       // TODO: Set up your game interface here, according to "gamedatas"
 
-      this.setupGameBoard(gamedatas.board);
+      this.setupGameBoard(gamedatas.material_info.board);
       this.setupTokensOnBoard(gamedatas);
 
       // Setup game notifications to handle (see "setupNotifications" method below)
@@ -166,12 +166,10 @@ define([
       }
     },
     setupTokensOnBoard: function (gamedatas) {
-      const { game_state } = gamedatas;
+      const { token_state } = gamedatas;
 
-      game_state.map((token) => {
-        if (token.location === "board") {
-          this.placeTokenOnBoard(token);
-        }
+      token_state["board"].map((token) => {
+        this.placeTokenOnBoard(token);
       });
     },
     placeTokenOnBoard: function (token) {

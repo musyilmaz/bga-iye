@@ -194,10 +194,16 @@ class iye extends Table
             "SELECT player_id, player_score score FROM player"
         );
 
-        $result["token_types"] = $this->token_types;
-        $result["kam"] = $this->kam;
-        $result["board"] = $this->board;
-        $result["game_state"] = self::getObjectListFromDB("SELECT type type, location location, x x, y y FROM token");
+        $material_info = array(
+            "token_types" => $this->token_types,
+            "kam" => $this->kam,
+            "board" => $this->board
+        );
+        $result["material_info"] = $material_info;
+
+        $token_state_from_db = self::getObjectListFromDB("SELECT type type, location location, x x, y y FROM token");
+        $result["token_state"] = $this->groupBy($token_state_from_db, "location");
+
 
         return $result;
     }
@@ -336,5 +342,27 @@ class iye extends Table
         }
 
         throw new feException("Zombie mode not supported at this game state: \"{$state_name}\".");
+    }
+
+
+    /**
+     * Group items from an array together by some criteria or value.
+     *
+     * @param  $arr array The array to group items from
+     * @param  $criteria string|callable The key to group by or a function the returns a key to group by.
+     * @return array
+     *
+     */
+    protected function groupBy($arr, $criteria): array
+    {
+        return array_reduce($arr, function ($accumulator, $item) use ($criteria) {
+            $key = (is_callable($criteria)) ? $criteria($item) : $item[$criteria];
+            if (!array_key_exists($key, $accumulator)) {
+                $accumulator[$key] = [];
+            }
+
+            array_push($accumulator[$key], $item);
+            return $accumulator;
+        }, []);
     }
 }

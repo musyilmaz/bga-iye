@@ -42,14 +42,14 @@ $this->token_types = [
     "name" => clientTranslate("sun"),
     "tooltip" => clientTranslate("TOOLTIP: sun information"),
     "amount" => 9,
-    "points" => 1
+    "points" => 9
   ],
   "horse" => [
     "type" => "horse",
     "name" => clientTranslate("horse"),
     "tooltip" => clientTranslate("TOOLTIP: horse information"),
     "amount" => 7,
-    "points" => 3
+    "points" => 7
   ],
   "tree" => [
     "type" => "tree",
@@ -63,14 +63,14 @@ $this->token_types = [
     "name" => clientTranslate("water"),
     "tooltip" => clientTranslate("TOOLTIP: water information"),
     "amount" => 3,
-    "points" => 7
+    "points" => 3
   ],
   "owl" => [
     "type" => "owl",
     "name" => clientTranslate("owl"),
     "tooltip" => clientTranslate("TOOLTIP: owl information"),
     "amount" => 1,
-    "points" => 9
+    "points" => 1
   ],
 ];
 
