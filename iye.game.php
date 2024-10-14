@@ -195,14 +195,14 @@ class iye extends Table
         );
 
         $material_info = array(
-            "token_types" => $this->token_types,
+            "tokenTypes" => $this->token_types,
             "kam" => $this->kam,
             "board" => $this->board
         );
-        $result["material_info"] = $material_info;
+        $result["materialInfo"] = $material_info;
 
         $token_state_from_db = self::getObjectListFromDB("SELECT type type, location location, x x, y y FROM token");
-        $result["token_state"] = $this->groupBy($token_state_from_db, "location");
+        $result["tokenState"] = $this->groupBy($token_state_from_db, "location");
 
 
         return $result;

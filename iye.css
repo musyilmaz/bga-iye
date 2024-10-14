@@ -104,41 +104,62 @@
   height: 80px;
 }
 
-.token_zone > .player_token {
+.token_zone > .player_token_wrapper {
   position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.token_zone > .player_token_wrapper > .player_token {
+  position: absolute;
   width: 60px;
   height: 60px;
   background-image: url("img/tokens.jpg");
   background-size: auto 100%;
 }
 
-.token_zone > .player_token > .player_token_amount {
+.low_opacity {
+  opacity: 0.2;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.token_zone > .player_token_wrapper > .player_token_amount {
   position: absolute;
   bottom: -12px;
   right: -6px;
   width: 24px;
   height: 24px;
-  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border: 1px solid black;
   border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+  color: black;
 }
 
-.token_zone > .player_token[data-token-type="owl"] {
+.token_zone > .player_token_wrapper > .player_token[data-token-type="owl"] {
   background-position-x: 0px;
 }
 
-.token_zone > .player_token[data-token-type="water"] {
+.token_zone > .player_token_wrapper > .player_token[data-token-type="water"] {
   background-position-x: -60px;
 }
 
-.token_zone > .player_token[data-token-type="tree"] {
+.token_zone > .player_token_wrapper > .player_token[data-token-type="tree"] {
   background-position-x: -120px;
 }
 
-.token_zone > .player_token[data-token-type="horse"] {
+.token_zone > .player_token_wrapper > .player_token[data-token-type="horse"] {
   background-position-x: -180px;
 }
 
-.token_zone > .player_token[data-token-type="sun"] {
+.token_zone > .player_token_wrapper > .player_token[data-token-type="sun"] {
   background-position-x: -240px;
 }
 

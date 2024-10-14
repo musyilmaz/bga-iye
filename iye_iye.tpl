@@ -34,7 +34,8 @@
       </div>
       <div class="token_zone">
         <!-- BEGIN player_tokens -->
-        <div id="player_{PLAYER_ID}_token" class="player_token" data-token-type="{TOKEN_TYPE}">
+        <div class="player_token_wrapper" id="player_{PLAYER_ID}_token_{TOKEN_TYPE}_wrapper">
+          <div id="player_{PLAYER_ID}_token" class="player_token" data-token-type="{TOKEN_TYPE}"></div>
           <div id="player_{PLAYER_ID}_token_{TOKEN_TYPE}_amount" class="player_token_amount"></div>
         </div>
         <!-- END player_tokens -->

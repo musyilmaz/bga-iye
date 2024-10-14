@@ -54,8 +54,8 @@ define([
 
       // TODO: Set up your game interface here, according to "gamedatas"
 
-      this.setupGameBoard(gamedatas.material_info.board);
-      this.setupTokensOnBoard(gamedatas);
+      this.setupGameBoard(gamedatas.materialInfo.board);
+      this.setupTokens(gamedatas);
 
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();
@@ -165,12 +165,36 @@ define([
         }
       }
     },
-    setupTokensOnBoard: function (gamedatas) {
-      const { token_state } = gamedatas;
+    setupTokens: function (gamedatas) {
+      const { tokenState, players, materialInfo } = gamedatas;
 
-      token_state["board"].map((token) => {
+      tokenState["board"].map((token) => {
         this.placeTokenOnBoard(token);
       });
+
+      for (const playerId in players) {
+        const tokenAmounts = this.playerTokenAmounts(
+          tokenState[playerId],
+          materialInfo.tokenTypes
+        );
+
+        for (const [tokenType, tokenAmount] of tokenAmounts) {
+          const [playerTokenElement, playerTokenAmountElement] =
+            document.getElementById(
+              `player_${playerId}_token_${tokenType}_wrapper`
+            ).children;
+
+          if (tokenAmount) {
+            dojo.removeClass(playerTokenElement, "low_opacity");
+            dojo.removeClass(playerTokenAmountElement, "hidden");
+          } else {
+            dojo.addClass(playerTokenElement, "low_opacity");
+            dojo.addClass(playerTokenAmountElement, "hidden");
+          }
+
+          playerTokenAmountElement.innerText = tokenAmount;
+        }
+      }
     },
     placeTokenOnBoard: function (token) {
       const { x, y, type } = token;
@@ -191,6 +215,22 @@ define([
 
         this.placeOnObject(`token_${x}_${y}`, `square_${x}_${y}`);
       }
+    },
+    playerTokenAmounts: function (playerTokens, tokenTypes) {
+      const tokenAmounts = new Map();
+
+      for (const tokenType in tokenTypes) {
+        tokenAmounts.set(tokenType, 0);
+      }
+
+      for (const playerToken of playerTokens) {
+        tokenAmounts.set(
+          playerToken.type,
+          tokenAmounts.get(playerToken.type) + 1
+        );
+      }
+
+      return tokenAmounts;
     },
 
     ///////////////////////////////////////////////////
