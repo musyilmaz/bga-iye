@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
@@ -51,53 +52,40 @@
 
 
 $machinestates = [
-
-    // The initial state. Please do not modify.
-
-    1 => array(
+    STATE_GAME_SETUP => array(
         "name" => "gameSetup",
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => ["" => 2]
+        "transitions" => ["" => STATE_PLAYER_MOVE_KAM]
     ),
 
-    // Note: ID=2 => your first state
-
-    2 => [
+    STATE_PLAYER_MOVE_KAM => [
         "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must play a card or pass'),
-        "descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
+        "description" => clienttranslate('${actplayer} must move kam to a valid position'),
+        "descriptionmyturn" => clienttranslate('${you} must move kam to a valid position'),
         "type" => "activeplayer",
         "args" => "argPlayerTurn",
         "possibleactions" => [
-            // these actions are called from the front with bgaPerformAction, and matched to the function on the game.php file
-            "actPlayCard", 
-            "actPass",
+            "actMoveKam",
         ],
-        "transitions" => ["playCard" => 3, "pass" => 3]
+        "transitions" => ["moveKam" => STATE_NEXT_PLAYER]
     ],
 
-    3 => [
+    STATE_NEXT_PLAYER => [
         "name" => "nextPlayer",
         "description" => '',
         "type" => "game",
         "action" => "stNextPlayer",
         "updateGameProgression" => true,
-        "transitions" => ["endGame" => 99, "nextPlayer" => 2]
+        "transitions" => ["nextTurn" => STATE_PLAYER_MOVE_KAM, "endGame" => STATE_GAME_END]
     ],
 
-    // Final state.
-    // Please do not modify (and do not overload action/args methods).
-    99 => [
+    STATE_GAME_END => [
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",
         "action" => "stGameEnd",
         "args" => "argGameEnd"
     ],
-
 ];
-
-
-

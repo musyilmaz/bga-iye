@@ -118,14 +118,6 @@
   background-size: auto 100%;
 }
 
-.low_opacity {
-  opacity: 0.2;
-}
-
-.hidden {
-  display: none !important;
-}
-
 .token_zone > .player_token_wrapper > .player_token_amount {
   position: absolute;
   bottom: -12px;
@@ -213,4 +205,12 @@
 
 .token[data-token-type="sun"] {
   background-position-x: -440px;
+}
+
+.low_opacity {
+  opacity: 0.2;
+}
+
+.hidden {
+  display: none !important;
 }

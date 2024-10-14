@@ -20,6 +20,11 @@ declare(strict_types=1);
 
 require_once(APP_GAMEMODULE_PATH . "module/table/table.game.php");
 
+define("STATE_GAME_SETUP", 1);
+define("STATE_PLAYER_MOVE_KAM", 10);
+define("STATE_NEXT_PLAYER", 20);
+define("STATE_GAME_END", 99);
+
 class iye extends Table
 {
     /**
