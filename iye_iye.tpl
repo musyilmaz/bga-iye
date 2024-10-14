@@ -27,22 +27,20 @@
 
 <div class="play_area_wrapper">
   <div id="player_zone_wrapper">
-    <!-- BEGIN player -->
-      <div id="player_{PLAYER_ID}" class="player_board whiteblock">
-        <div class="player_name" style="color: #{PLAYER_COLOR}">
-          {PLAYER_NAME}
-        </div>
-        <!-- BEGIN token_zone -->
-          <div class="token_zone">
-            <div class="player_token" data-token-type="sun"></div>
-            <div class="player_token" data-token-type="horse"></div>
-            <div class="player_token" data-token-type="tree"></div>
-            <div class="player_token" data-token-type="water"></div>
-            <div class="player_token" data-token-type="owl"></div>
-          </div>
-        <!-- END token_zone -->
+    <!-- BEGIN player_zones -->
+    <div id="player_{PLAYER_ID}" class="player_board whiteblock">
+      <div class="player_name" style="color: #{PLAYER_COLOR}">
+        {PLAYER_NAME}
       </div>
-    <!-- END player -->
+      <div class="token_zone">
+        <!-- BEGIN player_tokens -->
+        <div id="player_{PLAYER_ID}_token" class="player_token" data-token-type="{TOKEN_TYPE}">
+          <div id="player_{PLAYER_ID}_token_{TOKEN_TYPE}_amount" class="player_token_amount"></div>
+        </div>
+        <!-- END player_tokens -->
+      </div>
+    </div>
+    <!-- END player_zones -->
   </div>
   <div id="iye_board">
     <div id="iye_tokens"></div>
