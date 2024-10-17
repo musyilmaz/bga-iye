@@ -104,7 +104,7 @@ class iye extends Table
      */
     public function argPlayerTurn(): array
     {
-        // Get some values from the current game situation from the database.
+        $possibleKamMovements = $this->getPossibleKamMovements(intval($this->getActivePlayerId()));
 
         return [
             "playableCardsIds" => [1, 2],
@@ -349,7 +349,208 @@ class iye extends Table
         throw new feException("Zombie mode not supported at this game state: \"{$state_name}\".");
     }
 
+    /**
+     * Generates possible kam movements for active player
+     * Contains x,y coordinates along with possible discardable tokens.
+     * 
+     * @param $player_id active_player
+     * @return array of possible movements
+     */
+    protected function getPossibleKamMovements($player_id)
+    {
+        $result = array();
 
+        $kam_pos = $this->getKamPosition();
+        $board_state = $this->getBoardState();
+        $allowed_movesets = $this->getAllowedMovesetsForPlayerBasedOnTokenTypes($player_id);
+
+        foreach ($allowed_movesets as $moveset) {
+            switch ($moveset) {
+                case "sun":
+                    $positions = $this->getSunMovesetPositions($board_state);
+                    var_dump($positions);
+                    break;
+                case "horse":
+                    $positions = $this->getHorseMovesetPositions($kam_pos, $board_state);
+                    var_dump($positions);
+                    break;
+                case "tree":
+                    $positions = $this->getTreeMovesetPositions($kam_pos, $board_state);
+                    var_dump($positions);
+                    break;
+                case "water":
+                    $positions = $this->getWaterMovesetPositions($kam_pos, $board_state);
+                    var_dump($positions);
+                    break;
+                case "owl":
+                    $positions = $this->getOwlMovesetPositions($board_state);
+                    var_dump($positions);
+                    break;
+                default:
+                    $positions = $this->getBasicMovesetPositions($kam_pos, $board_state);
+                    var_dump($positions);
+                    break;
+            }
+        }
+
+        return $result;
+    }
+    protected function getKamPosition()
+    {
+        $kam_state = self::getObjectListFromDB("SELECT * FROM token where type='kam'")[0];
+
+        $kam_pos_x = intval($kam_state["x"]);
+        $kam_pos_y = intval($kam_state["y"]);
+
+        return [$kam_pos_x, $kam_pos_y];
+    }
+    protected function getBoardState()
+    {
+        return self::getObjectListFromDB("SELECT * FROM token where location='board'");
+    }
+    protected function getAllowedMovesetsForPlayerBasedOnTokenTypes($player_id)
+    {
+        $basic_moveset = array("basic");
+        $player_token_state = self::getObjectListFromDB("SELECT * FROM token where location=$player_id");
+        $player_token_types = array_keys($this->groupBy($player_token_state, "type"));
+
+        return array_merge($basic_moveset, $player_token_types);
+    }
+    protected function generatePossibleCoordinatesByModification($kam_pos, $movements)
+    {
+        $possible_coordinates = array();
+
+        foreach ($movements as $movement) {
+            $target_pos_x = $kam_pos[0] + $movement[0];
+            $target_pos_y = $kam_pos[1] + $movement[1];
+
+            array_push($possible_coordinates, $target_pos_x . $target_pos_y);
+        }
+
+        return $possible_coordinates;
+    }
+    protected function filterBoardStateForPossibleCoordinates($board_state, $possible_coordinates)
+    {
+        return array_filter($board_state, function ($coordinate) use ($possible_coordinates) {
+            return in_array($coordinate["x"] . $coordinate["y"], $possible_coordinates, false);
+        });
+    }
+    protected function generateMovesetPositionsFromFilteredBoardState($filtered_board_state, $movement_type)
+    {
+        return array_map(function ($item) use ($movement_type) {
+            return ["x" => $item["x"], "y" => $item["y"], "movement" => $movement_type];
+        }, $filtered_board_state);
+    }
+    protected function getBasicMovesetPositions($kam_pos, $board_state)
+    {
+        $basic_modifications = array(
+            array(-2, 0),
+            array(-1, 0),
+            array(1, 0),
+            array(2, 0),
+            array(0, -2),
+            array(0, -1),
+            array(0, 1),
+            array(0, 2),
+        );
+
+        $possible_coordinates = $this->generatePossibleCoordinatesByModification($kam_pos, $basic_modifications);
+        $filtered_board_state = $this->filterBoardStateForPossibleCoordinates($board_state, $possible_coordinates);
+        return $this->generateMovesetPositionsFromFilteredBoardState($filtered_board_state, "basic");
+    }
+    protected function getSunMovesetPositions($board_state)
+    {
+        $sun_target_coordinates = array(
+            array(0, 0),
+            array(0, 4),
+            array(4, 0),
+            array(4, 4)
+        );
+
+        $possible_coordinates = array();
+        foreach ($sun_target_coordinates as $coordinate) {
+            array_push($possible_coordinates, $coordinate[0] . $coordinate[1]);
+        }
+
+        $filtered_board_state = $this->filterBoardStateForPossibleCoordinates($board_state, $possible_coordinates);
+        return $this->generateMovesetPositionsFromFilteredBoardState($filtered_board_state, "sun");
+    }
+    protected function getHorseMovesetPositions($kam_pos, $board_state)
+    {
+        $horse_modifications = array(
+            array(-2, -1),
+            array(-2, 1),
+            array(2, -1),
+            array(2, 1),
+            array(-1, -2),
+            array(-1, 2),
+            array(1, -2),
+            array(1, 2),
+        );
+
+        $possible_coordinates = $this->generatePossibleCoordinatesByModification($kam_pos, $horse_modifications);
+        $filtered_board_state = $this->filterBoardStateForPossibleCoordinates($board_state, $possible_coordinates);
+        return $this->generateMovesetPositionsFromFilteredBoardState($filtered_board_state, "horse");
+    }
+    protected function getTreeMovesetPositions($kam_pos, $board_state)
+    {
+        $tree_modifications = array(
+            array(-1, -1),
+            array(-1, 1),
+            array(1, -1),
+            array(1, 1),
+        );
+
+        $possible_coordinates = $this->generatePossibleCoordinatesByModification($kam_pos, $tree_modifications);
+        $filtered_board_state = $this->filterBoardStateForPossibleCoordinates($board_state, $possible_coordinates);
+        return $this->generateMovesetPositionsFromFilteredBoardState($filtered_board_state, "tree");
+    }
+    protected function getWaterMovesetPositions($kam_pos, $board_state)
+    {
+        $water_modifications = array(
+            array(0, 1),
+            array(0, 2),
+            array(0, 3),
+            array(0, 4),
+            array(0, -1),
+            array(0, -2),
+            array(0, -3),
+            array(0, -4),
+            array(1, 0),
+            array(2, 0),
+            array(3, 0),
+            array(4, 0),
+            array(-1, 0),
+            array(-2, 0),
+            array(-3, 0),
+            array(-4, 0),
+
+            array(1, 1),
+            array(2, 2),
+            array(3, 3),
+            array(4, 4),
+            array(1, -1),
+            array(2, -2),
+            array(3, -3),
+            array(4, -4),
+            array(1, -1),
+            array(2, -2),
+            array(3, -3),
+            array(4, -4),
+            array(-1, -1),
+            array(-2, -2),
+            array(-3, -3),
+            array(-4, -4),
+        );
+
+        $possible_coordinates = $this->generatePossibleCoordinatesByModification($kam_pos, $water_modifications);
+        $filtered_board_state = $this->filterBoardStateForPossibleCoordinates($board_state, $possible_coordinates);
+        return $this->generateMovesetPositionsFromFilteredBoardState($filtered_board_state, "water");
+    }
+    protected function getOwlMovesetPositions($board_state)
+    {
+        return $this->generateMovesetPositionsFromFilteredBoardState($board_state, "owl");
+    }
     /**
      * Group items from an array together by some criteria or value.
      *
