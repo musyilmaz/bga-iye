@@ -160,8 +160,6 @@ define([
           materialInfo.tokenTypes
         );
 
-        console.log("tokenAmounts", tokenAmounts);
-
         for (const [tokenType, tokenAmount] of tokenAmounts) {
           const [playerTokenElement, playerTokenAmountElement] =
             document.getElementById(
