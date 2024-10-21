@@ -104,8 +104,6 @@ class iye extends Table
      */
     public function argPlayerTurn(): array
     {
-        $possibleKamMovements = $this->getPossibleKamMovements(intval($this->getActivePlayerId()));
-
         return [
             "possibleCoordinates" => $this->getPossibleKamMovements(intval($this->getActivePlayerId()))
         ];
