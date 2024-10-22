@@ -58,6 +58,12 @@ class iye extends Table
      * @throws BgaSystemException
      * @see action_iye::actMyAction
      */
+    public function actPlayerMoveKam(int $x, int $y)
+    {
+        $player_id = intval($this->getActivePlayerId());
+
+        // TODO here
+    }
     public function actPlayCard(int $card_id): void
     {
         // Retrieve the active player ID.

@@ -45,7 +45,6 @@ define([
 
     setup: function (gamedatas) {
       console.log("Starting game setup");
-      console.log("❗ gamedatas:", gamedatas);
 
       // Setting up player boards
       for (let player_id in gamedatas.players) {
@@ -56,6 +55,14 @@ define([
 
       this.setupGameBoard(gamedatas.materialInfo.board);
       this.setupTokens(gamedatas);
+
+      document
+        .querySelectorAll(".iye_square")
+        .forEach((iyeSquare) =>
+          iyeSquare.addEventListener("click", (e) =>
+            this.onMoveKamToCoordinate(e)
+          )
+        );
 
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();
@@ -229,29 +236,21 @@ define([
 
     ///////////////////////////////////////////////////
     //// Player's action
+    onMoveKamToCoordinate: function (event) {
+      event.preventDefault();
+      event.stopPropagation();
 
-    /*
-        
-            Here, you are defining methods to handle player's action (ex: results of mouse click on 
-            game objects).
-            
-            Most of the time, these methods:
-            _ check the action is possible at this game state.
-            _ make a call to the game server
-        
-        */
+      const coordinates = event.target.id.split("_");
+      const x = coordinates[1];
+      const y = coordinates[2];
 
-    // Example:
+      const targetSquare = document.getElementById(`square_${x}_${y}`);
 
-    onCardClick: function (card_id) {
-      console.log("onCardClick", card_id);
+      if (!targetSquare.classList.contains("possible_coordinate")) {
+        return;
+      }
 
-      this.bgaPerformAction("actPlayCard", {
-        card_id,
-      }).then(() => {
-        // What to do after the server call if it succeeded
-        // (most of the time, nothing, as the game will react to notifs / change of state instead)
-      });
+      this.bgaPerformAction("actPlayerMoveKam", { x, y });
     },
 
     ///////////////////////////////////////////////////

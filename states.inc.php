@@ -67,7 +67,7 @@ $machinestates = [
         "type" => "activeplayer",
         "args" => "argPlayerMoveKam",
         "possibleactions" => [
-            "actMoveKam",
+            "actPlayerMoveKam",
         ],
         "transitions" => ["moveKam" => STATE_NEXT_PLAYER]
     ],
