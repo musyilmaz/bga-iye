@@ -61,11 +61,11 @@ $machinestates = [
     ),
 
     STATE_PLAYER_MOVE_KAM => [
-        "name" => "playerTurn",
+        "name" => "playerMoveKam",
         "description" => clienttranslate('${actplayer} must move kam to a valid position'),
         "descriptionmyturn" => clienttranslate('${you} must move kam to a valid position'),
         "type" => "activeplayer",
-        "args" => "argPlayerTurn",
+        "args" => "argPlayerMoveKam",
         "possibleactions" => [
             "actMoveKam",
         ],

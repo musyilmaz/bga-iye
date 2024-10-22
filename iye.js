@@ -73,16 +73,9 @@ define([
       console.log("Entering state: " + stateName, args);
 
       switch (stateName) {
-        /* Example:
-            
-            case 'myGameState':
-            
-                // Show some HTML block at this game state
-                dojo.style( 'my_html_block_id', 'display', 'block' );
-                
-                break;
-           */
-
+        case "playerMoveKam":
+          this.updatePossibleKamCoordinates(args.args.possibleCoordinates);
+          break;
         case "dummmy":
           break;
       }
@@ -95,16 +88,6 @@ define([
       console.log("Leaving state: " + stateName);
 
       switch (stateName) {
-        /* Example:
-            
-            case 'myGameState':
-            
-                // Hide the HTML block we are displaying only during this game state
-                dojo.style( 'my_html_block_id', 'display', 'none' );
-                
-                break;
-           */
-
         case "dummmy":
           break;
       }
@@ -118,8 +101,16 @@ define([
 
       if (this.isCurrentPlayerActive()) {
         switch (stateName) {
-          case "playerTurn":
-            // TODO: handle some logic here
+          case "playerMoveKam":
+            // TODO: This part handles action buttons place here.
+            this.addActionButton(
+              "actPass-btn",
+              _("Pass"),
+              () => console.log("act of passing"),
+              null,
+              null,
+              "gray"
+            );
             break;
         }
       }
@@ -215,6 +206,25 @@ define([
       }
 
       return tokenAmounts;
+    },
+    updatePossibleKamCoordinates: function (possibleCoordinates) {
+      document
+        .querySelectorAll(".possible_coordinate")
+        .forEach((div) => div.classList.remove("possible_coordinate"));
+
+      for (const coordinate of possibleCoordinates) {
+        const { x, y } = coordinate;
+        const targetSquare = document.getElementById(`square_${x}_${y}`);
+
+        targetSquare.classList.add("possible_coordinate");
+        targetSquare.classList.add(`possible_coordinate_${x}_${y}_tooltip`);
+
+        this.addTooltipToClass(
+          `possible_coordinate_${x}_${y}_tooltip`,
+          _("TODO this information"),
+          _("Change this information")
+        );
+      }
     },
 
     ///////////////////////////////////////////////////

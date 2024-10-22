@@ -102,7 +102,7 @@ class iye extends Table
      * @return string[]
      * @see ./states.inc.php
      */
-    public function argPlayerTurn(): array
+    public function argPlayerMoveKam(): array
     {
         return [
             "possibleCoordinates" => $this->getPossibleKamMovements(intval($this->getActivePlayerId()))
