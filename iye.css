@@ -178,6 +178,10 @@
   cursor: pointer;
 }
 
+.selected_possible_coordinate {
+  border: 10px solid rgba(255, 0, 0, 1);
+}
+
 .token {
   position: absolute;
   width: 110px;

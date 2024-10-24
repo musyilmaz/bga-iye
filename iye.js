@@ -15,6 +15,10 @@
  *
  */
 
+const PLAYER_MOVE_KAM = "playerMoveKam";
+const CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE = "client_playerSelectTokenToMove";
+const CLIENT_PLAYER_CONFIRM_MOVE = "client_playerConfirmMove";
+
 define([
   "dojo",
   "dojo/_base/declare",
@@ -56,14 +60,6 @@ define([
       this.setupGameBoard(gamedatas.materialInfo.board);
       this.setupTokens(gamedatas);
 
-      document
-        .querySelectorAll(".iye_square")
-        .forEach((iyeSquare) =>
-          iyeSquare.addEventListener("click", (e) =>
-            this.onMoveKamToCoordinate(e)
-          )
-        );
-
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();
 
@@ -77,14 +73,22 @@ define([
     //                  You can use this method to perform some user interface changes at this moment.
     //
     onEnteringState: function (stateName, args) {
-      console.log("Entering state: " + stateName, args);
-
       switch (stateName) {
-        case "playerMoveKam":
+        case PLAYER_MOVE_KAM: {
           this.updatePossibleKamCoordinates(args.args.possibleCoordinates);
           break;
-        case "dummmy":
+        }
+        case CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE: {
+          console.log(
+            "ENTERING STATE :: CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE",
+            args
+          );
           break;
+        }
+        case CLIENT_PLAYER_CONFIRM_MOVE: {
+          console.log("ENTERING STATE :: CLIENT_PLAYER_CONFIRM_MOVE", args);
+          break;
+        }
       }
     },
 
@@ -92,11 +96,19 @@ define([
     //                 You can use this method to perform some user interface changes at this moment.
     //
     onLeavingState: function (stateName) {
-      console.log("Leaving state: " + stateName);
-
       switch (stateName) {
-        case "dummmy":
+        case PLAYER_MOVE_KAM: {
+          console.log("LEAVING STATE :: PLAYER_MOVE_KAM");
           break;
+        }
+        case CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE: {
+          console.log("LEAVING STATE :: CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE");
+          break;
+        }
+        case CLIENT_PLAYER_CONFIRM_MOVE: {
+          console.log("LEAVING STATE :: CLIENT_PLAYER_CONFIRM_MOVE");
+          break;
+        }
       }
     },
 
@@ -104,21 +116,26 @@ define([
     //                        action status bar (ie: the HTML links in the status bar).
     //
     onUpdateActionButtons: function (stateName, args) {
-      console.log("onUpdateActionButtons: " + stateName, args);
-
       if (this.isCurrentPlayerActive()) {
         switch (stateName) {
-          case "playerMoveKam":
-            // TODO: This part handles action buttons place here.
-            this.addActionButton(
-              "actPass-btn",
-              _("Pass"),
-              () => console.log("act of passing"),
-              null,
-              null,
-              "gray"
+          case PLAYER_MOVE_KAM: {
+            console.log("UPDATE_ACTION_BUTTONS :: PLAYER_MOVE_KAM", args);
+            break;
+          }
+          case CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE: {
+            console.log(
+              "UPDATE_ACTION_BUTTONS :: CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE",
+              args
             );
             break;
+          }
+          case CLIENT_PLAYER_CONFIRM_MOVE: {
+            console.log(
+              "UPDATE_ACTION_BUTTONS :: CLIENT_PLAYER_CONFIRM_MOVE",
+              args
+            );
+            break;
+          }
         }
       }
     },
@@ -215,9 +232,11 @@ define([
       return tokenAmounts;
     },
     updatePossibleKamCoordinates: function (possibleCoordinates) {
-      document
-        .querySelectorAll(".possible_coordinate")
-        .forEach((div) => div.classList.remove("possible_coordinate"));
+      document.querySelectorAll(".possible_coordinate").forEach((div) => {
+        // TODO: This might be a hac and not needed
+        div.removeEventListener("click");
+        div.classList.remove("possible_coordinate");
+      });
 
       for (const coordinate of possibleCoordinates) {
         const { x, y } = coordinate;
@@ -225,6 +244,9 @@ define([
 
         targetSquare.classList.add("possible_coordinate");
         targetSquare.classList.add(`possible_coordinate_${x}_${y}_tooltip`);
+        targetSquare.addEventListener("click", (e) =>
+          this.onMoveKamToCoordinate(e, coordinate)
+        );
 
         this.addTooltipToClass(
           `possible_coordinate_${x}_${y}_tooltip`,
@@ -236,21 +258,39 @@ define([
 
     ///////////////////////////////////////////////////
     //// Player's action
-    onMoveKamToCoordinate: function (event) {
+    onMoveKamToCoordinate: function (event, coordinateInfo) {
       event.preventDefault();
       event.stopPropagation();
 
-      const coordinates = event.target.id.split("_");
-      const x = coordinates[1];
-      const y = coordinates[2];
-
+      const { x, y, movement: spendableTokens } = coordinateInfo;
       const targetSquare = document.getElementById(`square_${x}_${y}`);
 
-      if (!targetSquare.classList.contains("possible_coordinate")) {
-        return;
-      }
+      if (!targetSquare.classList.contains("possible_coordinate")) return;
 
-      this.bgaPerformAction("actPlayerMoveKam", { x, y });
+      document
+        .querySelectorAll(".selected_possible_coordinate")
+        .forEach((spc) => spc.classList.remove("selected_possible_coordinate"));
+
+      targetSquare.classList.add("selected_possible_coordinate");
+
+      if (spendableTokens.length === 1) {
+        const token = spendableTokens[0];
+        this.setClientState(CLIENT_PLAYER_CONFIRM_MOVE, {
+          descriptionmyturn: _("${you} must confirm your turn"),
+          args: { x, y, token },
+        });
+      } else {
+        this.setClientState(CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE, {
+          descriptionmyturn: _(
+            "${you} must select a token to move selected position"
+          ),
+          args: {
+            x,
+            y,
+            spendableTokens,
+          },
+        });
+      }
     },
 
     ///////////////////////////////////////////////////
