@@ -86,7 +86,10 @@ define([
           break;
         }
         case CLIENT_PLAYER_CONFIRM_MOVE: {
-          console.log("ENTERING STATE :: CLIENT_PLAYER_CONFIRM_MOVE", args);
+          this.updateInformationZone(
+            this.createInformationForTokenToSpend(args.args.token),
+            false
+          );
           break;
         }
       }
@@ -123,9 +126,28 @@ define([
             break;
           }
           case CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE: {
-            console.log(
-              "UPDATE_ACTION_BUTTONS :: CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE",
-              args
+            const { x, y, spendableTokens } = args;
+            for (const token of spendableTokens) {
+              this.addActionButton(
+                `confirm_${token}Spend`,
+                _(`Spend ${this.capitalizeWord(token)} Token`),
+                () => {
+                  this.setClientState(CLIENT_PLAYER_CONFIRM_MOVE, {
+                    descriptionmyturn: _("${you} must confirm your turn"),
+                    args: { x, y, token },
+                  });
+                }
+              );
+            }
+            this.addActionButton(
+              "cancel_playerMoveKam",
+              _("Reset Turn"),
+              () => {
+                this.resetTurn();
+              },
+              null,
+              false,
+              "gray"
             );
             break;
           }
@@ -290,19 +312,13 @@ define([
 
       if (spendableTokens.length === 1) {
         const token = spendableTokens[0];
-        this.updateInformationZone(
-          this.createInformationForTokenToSpend(token),
-          false
-        );
         this.setClientState(CLIENT_PLAYER_CONFIRM_MOVE, {
           descriptionmyturn: _("${you} must confirm your turn"),
           args: { x, y, token },
         });
       } else {
         this.setClientState(CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE, {
-          descriptionmyturn: _(
-            "${you} must select a token to move selected position"
-          ),
+          descriptionmyturn: _("${you} must select a token to spend"),
           args: {
             x,
             y,
