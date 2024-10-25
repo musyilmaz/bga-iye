@@ -79,10 +79,6 @@ define([
           break;
         }
         case CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE: {
-          console.log(
-            "ENTERING STATE :: CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE",
-            args
-          );
           break;
         }
         case CLIENT_PLAYER_CONFIRM_MOVE: {
@@ -101,15 +97,12 @@ define([
     onLeavingState: function (stateName) {
       switch (stateName) {
         case PLAYER_MOVE_KAM: {
-          console.log("LEAVING STATE :: PLAYER_MOVE_KAM");
           break;
         }
         case CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE: {
-          console.log("LEAVING STATE :: CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE");
           break;
         }
         case CLIENT_PLAYER_CONFIRM_MOVE: {
-          console.log("LEAVING STATE :: CLIENT_PLAYER_CONFIRM_MOVE");
           break;
         }
       }
@@ -267,6 +260,8 @@ define([
       return tokenAmounts;
     },
     updatePossibleKamCoordinates: function (possibleCoordinates) {
+      if (!this.isCurrentPlayerActive()) return;
+
       document.querySelectorAll(".possible_coordinate").forEach((div) => {
         div.removeEventListener("click", null);
         div.classList.remove("possible_coordinate");
@@ -336,6 +331,14 @@ define([
     selectTargetSquare: function (targetSquare) {
       targetSquare.classList.add("selected_possible_coordinate");
     },
+    getKamTokenState: function () {
+      const { tokenState } = this.gamedatas;
+      const kamToken = tokenState["board"].find(
+        (token) => token.type === "kam"
+      );
+
+      return kamToken;
+    },
     moveKamToCoordinate: function (x, y) {
       const targetSquare = document.getElementById(`square_${x}_${y}`);
       const kamToken = document.getElementsByClassName("kam")[0];
@@ -389,8 +392,10 @@ define([
       }
     },
     resetTurn: function () {
+      const kamToken = this.getKamTokenState();
+
+      if (kamToken) this.moveKamToCoordinate(kamToken.x, kamToken.y);
       this.updateInformationZone(null, true);
-      this.moveKamToCoordinate(2, 2);
       this.resetSelectedTargetSquare();
       this.restoreServerGameState();
     },
