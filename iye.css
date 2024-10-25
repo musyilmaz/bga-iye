@@ -74,12 +74,61 @@
   align-items: center;
 }
 
-#player_zone_wrapper {
+#information_zone_wrapper {
   width: 420px;
   height: 720px;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
+}
+
+.token_transfer_information {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.token_spend_information {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.information_token {
+  width: 40px;
+  height: 40px;
+  background-image: url("img/tokens.jpg");
+  background-size: auto 100%;
+}
+
+.information_token[data-token-type="owl"] {
+  background-position-x: 0px;
+}
+
+.information_token[data-token-type="water"] {
+  background-position-x: -40px;
+}
+
+.information_token[data-token-type="tree"] {
+  background-position-x: -80px;
+}
+
+.information_token[data-token-type="horse"] {
+  background-position-x: -120px;
+}
+
+.information_token[data-token-type="sun"] {
+  background-position-x: -160px;
+}
+
+#player_zone_wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 40px;
 }
 
 .player_board {

@@ -262,19 +262,26 @@ define([
       event.preventDefault();
       event.stopPropagation();
 
+      this.resetSelectedTargetSquare();
       const { x, y, movement: spendableTokens } = coordinateInfo;
       const targetSquare = document.getElementById(`square_${x}_${y}`);
 
       if (!targetSquare.classList.contains("possible_coordinate")) return;
 
-      document
-        .querySelectorAll(".selected_possible_coordinate")
-        .forEach((spc) => spc.classList.remove("selected_possible_coordinate"));
+      this.selectTargetSquare(targetSquare);
+      this.moveKamToTargetSquare(targetSquare);
 
-      targetSquare.classList.add("selected_possible_coordinate");
+      this.updateInformationZone(
+        this.createInformationForTokenPassingToOpponent(x, y),
+        true
+      );
 
       if (spendableTokens.length === 1) {
         const token = spendableTokens[0];
+        this.updateInformationZone(
+          this.createInformationForTokenToSpend(token),
+          false
+        );
         this.setClientState(CLIENT_PLAYER_CONFIRM_MOVE, {
           descriptionmyturn: _("${you} must confirm your turn"),
           args: { x, y, token },
@@ -291,6 +298,55 @@ define([
           },
         });
       }
+    },
+
+    resetSelectedTargetSquare: function () {
+      document
+        .querySelectorAll(".selected_possible_coordinate")
+        .forEach((spc) => spc.classList.remove("selected_possible_coordinate"));
+    },
+    selectTargetSquare: function (targetSquare) {
+      targetSquare.classList.add("selected_possible_coordinate");
+    },
+    moveKamToTargetSquare: function (targetSquare) {
+      const kamToken = document.getElementsByClassName("kam")[0];
+      this.slideToObject(kamToken, targetSquare).play();
+    },
+    createInformationForTokenPassingToOpponent: function (x, y) {
+      const tokenAtTargetSquare = document
+        .getElementById(`token_${x}_${y}`)
+        .getAttribute("data-token-type");
+
+      return `
+        <div class="whiteblock token_transfer_information">
+          <span>Your opponent will get: </span>
+          <div class="information_token" data-token-type="${tokenAtTargetSquare}"></div>
+        </div>
+      `;
+    },
+    createInformationForTokenToSpend: function (token) {
+      if (token === "basic") {
+        return `
+          <div class="whiteblock token_spend_information">
+            No token is needed to complete this movement (basic movement)
+          </div>
+        `;
+      } else {
+        return `
+          <div class="whiteblock token_spend_information">
+            <span>You will spend </span>
+            <div class="information_token" data-token-type="${token}"></div>
+            <span> token to complete this movement (${token} movement)</span>
+          </div>
+        `;
+      }
+    },
+    updateInformationZone: function (element, resetInformationZone) {
+      const informationZone = document.getElementById("information_zone");
+      if (resetInformationZone) {
+        informationZone.innerHTML = "";
+      }
+      informationZone.insertAdjacentHTML("afterbegin", element);
     },
 
     ///////////////////////////////////////////////////
