@@ -130,9 +130,22 @@ define([
             break;
           }
           case CLIENT_PLAYER_CONFIRM_MOVE: {
-            console.log(
-              "UPDATE_ACTION_BUTTONS :: CLIENT_PLAYER_CONFIRM_MOVE",
-              args
+            this.addActionButton(
+              "confirm_playerMoveKam",
+              _("Confirm Turn"),
+              () => {
+                console.log("confirm turn");
+              }
+            );
+            this.addActionButton(
+              "cancel_playerMoveKam",
+              _("Reset Turn"),
+              () => {
+                this.resetTurn();
+              },
+              null,
+              false,
+              "gray"
             );
             break;
           }
@@ -233,8 +246,7 @@ define([
     },
     updatePossibleKamCoordinates: function (possibleCoordinates) {
       document.querySelectorAll(".possible_coordinate").forEach((div) => {
-        // TODO: This might be a hac and not needed
-        div.removeEventListener("click");
+        div.removeEventListener("click", null);
         div.classList.remove("possible_coordinate");
       });
 
@@ -308,6 +320,11 @@ define([
     selectTargetSquare: function (targetSquare) {
       targetSquare.classList.add("selected_possible_coordinate");
     },
+    moveKamToCoordinate: function (x, y) {
+      const targetSquare = document.getElementById(`square_${x}_${y}`);
+      const kamToken = document.getElementsByClassName("kam")[0];
+      this.slideToObject(kamToken, targetSquare).play();
+    },
     moveKamToTargetSquare: function (targetSquare) {
       const kamToken = document.getElementsByClassName("kam")[0];
       this.slideToObject(kamToken, targetSquare).play();
@@ -328,15 +345,20 @@ define([
       if (token === "basic") {
         return `
           <div class="whiteblock token_spend_information">
-            No token is needed to complete this movement (basic movement)
+            <span class="title">Basic Movement</span>
+            No token is needed to complete this movement.
           </div>
         `;
       } else {
         return `
           <div class="whiteblock token_spend_information">
-            <span>You will spend </span>
-            <div class="information_token" data-token-type="${token}"></div>
-            <span> token to complete this movement (${token} movement)</span>
+            <div class="information_title">
+              <span class="title">
+                ${this.capitalizeWord(token)} Movement
+              </span>
+              <div class="information_token" data-token-type="${token}"></div>
+            </div>
+            <span>You will spend ${token} token to complete this movement.</span>
           </div>
         `;
       }
@@ -346,7 +368,18 @@ define([
       if (resetInformationZone) {
         informationZone.innerHTML = "";
       }
-      informationZone.insertAdjacentHTML("afterbegin", element);
+      if (element) {
+        informationZone.insertAdjacentHTML("afterbegin", element);
+      }
+    },
+    resetTurn: function () {
+      this.updateInformationZone(null, true);
+      this.moveKamToCoordinate(2, 2);
+      this.resetSelectedTargetSquare();
+      this.restoreServerGameState();
+    },
+    capitalizeWord: function (word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
     },
 
     ///////////////////////////////////////////////////

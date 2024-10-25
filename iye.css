@@ -91,10 +91,22 @@
 
 .token_spend_information {
   display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.information_title {
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: flex-end;
   gap: 20px;
-  flex-wrap: wrap;
+}
+
+.title {
+  font-weight: 700;
 }
 
 .information_token {
