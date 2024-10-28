@@ -149,7 +149,11 @@ define([
               "confirm_playerMoveKam",
               _("Confirm Turn"),
               () => {
-                console.log("confirm turn");
+                this.bgaPerformAction("actPlayerMoveKam", {
+                  x: args.x,
+                  y: args.y,
+                  spent_token: args.token,
+                });
               }
             );
             this.addActionButton(

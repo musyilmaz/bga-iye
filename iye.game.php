@@ -58,46 +58,51 @@ class iye extends Table
      * @throws BgaSystemException
      * @see action_iye::actMyAction
      */
-    public function actPlayerMoveKam(int $x, int $y)
+    public function actPlayerMoveKam(int $x, int $y, string $spent_token)
     {
         $player_id = intval($this->getActivePlayerId());
+        $opponent_id = $this->getOpponentId($player_id);
+        $target_token = $this->getTokenAtCoordinate($x, $y);
 
-        // TODO here
-    }
-    public function actPlayCard(int $card_id): void
-    {
-        // Retrieve the active player ID.
-        $player_id = (int)$this->getActivePlayerId();
 
-        // Add your game logic to play a card here.
-        $card_name = $this->card_types[$card_id]['card_name'];
+        $this->updateKamPositionInDB($x, $y);
+        $this->updateTokenPositionToPlayerId($x, $y, $opponent_id);
+        if ($spent_token !== "basic") {
+            $this->removeSpentTokenFromPlayerId($spent_token, $player_id);
+        }
 
-        // Notify all players about the card played.
-        $this->notifyAllPlayers("cardPlayed", clienttranslate('${player_name} plays ${card_name}'), [
-            "player_id" => $player_id,
-            "player_name" => $this->getActivePlayerName(),
-            "card_name" => $card_name,
-            "card_id" => $card_id,
-            "i18n" => ['card_name'],
-        ]);
+        $this->notifyAllPlayers(
+            "moveKam",
+            clienttranslate('${player_name} moves kam.'),
+            array(
+                'player_id' => $player_id,
+                'player_name' => $this->getActivePlayerName(),
+            )
+        );
 
-        // at the end of the action, move to the next state
-        $this->gamestate->nextState("playCard");
-    }
+        $this->notifyAllPlayers(
+            "spentToken",
+            $spent_token === "basic" ?
+                clienttranslate('${player_name} uses basic movement for moving kam.') :
+                clienttranslate('${player_name} spends ${spent_token} for moving kam.'),
+            array(
+                'player_id' => $player_id,
+                'player_name' => $this->getActivePlayerName(),
+                'spent_token' => $spent_token
+            )
+        );
 
-    public function actPass(): void
-    {
-        // Retrieve the active player ID.
-        $player_id = (int)$this->getActivePlayerId();
-
-        // Notify all players about the choice to pass.
-        $this->notifyAllPlayers("cardPlayed", clienttranslate('${player_name} passes'), [
-            "player_id" => $player_id,
-            "player_name" => $this->getActivePlayerName(),
-        ]);
-
-        // at the end of the action, move to the next state
-        $this->gamestate->nextState("pass");
+        $this->notifyAllPlayers(
+            "receivedToken",
+            clienttranslate('${opponent_name} receives ${targetToken.type}.'),
+            array(
+                'player_id' => $player_id,
+                'player_name' => $this->getActivePlayerName(),
+                'opponent_id' => $opponent_id,
+                'opponent_name' => $this->getPlayerNameById($opponent_id),
+                'targetToken' => $target_token
+            )
+        );
     }
 
     /**
@@ -595,6 +600,54 @@ class iye extends Table
 
             return $acc;
         }, array());
+    }
+
+    /**
+     * Get opponent id
+     * This method works as filtering out current_player_id from player_ids
+     */
+    protected function getOpponentId($current_player_id)
+    {
+        $player_ids = array_keys($this->loadPlayersBasicInfos());
+
+        $opponent_ids = array_filter($player_ids, function ($player_id) use ($current_player_id) {
+            return $player_id !== $current_player_id;
+        });
+
+        return reset($opponent_ids);
+    }
+
+    /**
+     * Updates kam position in database
+     */
+    protected function updateKamPositionInDB($x, $y)
+    {
+        $sql = "UPDATE token SET x='$x', y='$y' WHERE type='kam'";
+        $this->DbQuery($sql);
+    }
+
+    protected function getTokenAtCoordinate($x, $y)
+    {
+        $sql = "SELECT * FROM token WHERE x='$x' AND y='$y' AND NOT type='kam'";
+        return self::getObjectFromDB($sql);
+    }
+
+    /**
+     * Move token at target location to player_id
+     */
+    protected function updateTokenPositionToPlayerId($x, $y, $player_id)
+    {
+        $sql = "UPDATE token SET x=null, y=null, location='$player_id' WHERE x='$x' AND y='$y' AND NOT type='kam'";
+        $this->DbQuery($sql);
+    }
+
+    /**
+     * Remove first occurance of token from player_id
+     */
+    protected function removeSpentTokenFromPlayerId($token, $player_id)
+    {
+        $sql = "UPDATE token SET location='spent' WHERE location='$player_id' AND type='$token' LIMIT 1";
+        $this->DbQuery($sql);
     }
 
     /**
