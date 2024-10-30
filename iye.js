@@ -53,6 +53,17 @@ define([
       // Setting up player boards
       for (let player_id in gamedatas.players) {
         const player = gamedatas.players[player_id];
+        this.getPlayerPanelElement(player_id).innerHTML = this.format_block(
+          "jstpl_player_board",
+          {
+            player_id,
+            sun: { present: "full_opacity", amount: 4 },
+            horse: { present: "low_opacity", amount: 0 },
+            tree: { present: "full_opacity", amount: 1 },
+            water: { present: "full_opacity", amount: 1 },
+            owl: { present: "full_opacity", amount: 1 },
+          }
+        );
       }
 
       // TODO: Set up your game interface here, according to "gamedatas"

@@ -1,30 +1,5 @@
 {OVERALL_GAME_HEADER}
 
-<!-- 
---------
--- BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
--- iye implementation : © <Your name here> <Your email address here>
--- 
--- This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
--- See http://en.boardgamearena.com/#!doc/Studio for more information.
--------
-
-    iye_iye.tpl
-    
-    This is the HTML template of your game.
-    
-    Everything you are writing in this file will be displayed in the HTML page of your game user interface,
-    in the "main game zone" of the screen.
-    
-    You can use in this template:
-    _ variables, with the format {MY_VARIABLE_ELEMENT}.
-    _ HTML block, with the BEGIN/END format
-    
-    See your "view" PHP file to check how to set variables and control blocks
-    
-    Please REMOVE this comment before publishing your game on BGA
--->
-
 <div class="play_area_wrapper">
   <div id="information_zone_wrapper">
     <div id="information_zone"></div>
@@ -53,14 +28,15 @@
 
 <script type="text/javascript">
 
-// Javascript HTML templates
-
-/*
-// Example:
-var jstpl_some_game_item='<div class="my_game_item" id="my_game_item_${MY_ITEM_ID}"></div>';
-
-*/
-
+  var jstpl_player_board = '\
+    <div id="player_board_${player_id}" class="iye_player_board">\
+      <div class="player_board_token ${sun.present}" data-token-type="sun"><span class="amount">${sun.amount}</span></div>\
+      <div class="player_board_token ${horse.present}" data-token-type="horse"><span class="amount">${horse.amount}</span></div>\
+      <div class="player_board_token ${tree.present}" data-token-type="tree"><span class="amount">${tree.amount}</span></div>\
+      <div class="player_board_token ${water.present}" data-token-type="water"><span class="amount">${water.amount}</span></div>\
+      <div class="player_board_token ${owl.present}" data-token-type="owl"><span class="amount">${owl.amount}</span></div>\
+    </div>\
+  ';
 </script>  
 
 {OVERALL_GAME_FOOTER}
