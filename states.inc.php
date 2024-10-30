@@ -69,12 +69,11 @@ $machinestates = [
         "possibleactions" => [
             "actPlayerMoveKam",
         ],
-        "transitions" => ["moveKam" => STATE_NEXT_PLAYER]
+        "transitions" => ["nextPlayer" => STATE_NEXT_PLAYER]
     ],
 
     STATE_NEXT_PLAYER => [
         "name" => "nextPlayer",
-        "description" => '',
         "type" => "game",
         "action" => "stNextPlayer",
         "updateGameProgression" => true,

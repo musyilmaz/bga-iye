@@ -352,6 +352,13 @@ define([
       const kamToken = document.getElementsByClassName("kam")[0];
       this.slideToObject(kamToken, targetSquare).play();
     },
+    moveAndDestroyTokenToPlayerInformationArea: function (x, y, playerId) {
+      const targetToken = document.getElementById(`token_${x}_${y}`);
+      const playerInformationArea = document.getElementById(
+        `player_${playerId}`
+      );
+      this.slideToObjectAndDestroy(targetToken, playerInformationArea, 500, 0);
+    },
     createInformationForTokenPassingToOpponent: function (x, y) {
       const tokenAtTargetSquare = document
         .getElementById(`token_${x}_${y}`)
@@ -407,49 +414,69 @@ define([
       return word.charAt(0).toUpperCase() + word.slice(1);
     },
 
-    ///////////////////////////////////////////////////
-    //// Reaction to cometD notifications
-
-    /*
-            setupNotifications:
-            
-            In this method, you associate each of your game notifications with your local method to handle it.
-            
-            Note: game notification names correspond to "notifyAllPlayers" and "notifyPlayer" calls in
-                  your iye.game.php file.
-        
-        */
     setupNotifications: function () {
-      console.log("notifications subscriptions setup");
+      const notifications = [["playerTurn", 1000]];
 
-      // TODO: here, associate your game notifications with local methods
-
-      // Example 1: standard notification handling
-      // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-
-      // Example 2: standard notification handling + tell the user interface to wait
-      //            during 3 seconds after calling the method in order to let the players
-      //            see what is happening in the game.
-      // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-      // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
-      //
+      notifications.forEach((notification) => {
+        const [name, timeout] = notification;
+        dojo.subscribe(name, this, `notif_${name}`);
+        this.notifqueue.setSynchronous(name, timeout);
+      });
     },
+    notif_playerTurn: function (notification) {
+      const { x, y, tokenState, tokenTypes, players, opponentId } =
+        notification.args;
 
-    // TODO: from this point and below, you can write your game notifications handling methods
+      // Remove possible moves from previous state
+      if (this.isCurrentPlayerActive) {
+        document.querySelectorAll(".possible_coordinate").forEach((div) => {
+          div.removeEventListener("click", null);
+          div.classList.remove("possible_coordinate");
+        });
+        document
+          .querySelectorAll(".selected_possible_coordinate")
+          .forEach((div) => {
+            div.classList.remove("selected_possible_coordinate");
+          });
+      }
 
-    /*
-        Example:
-        
-        notif_cardPlayed: function( notif )
-        {
-            console.log( 'notif_cardPlayed' );
-            console.log( notif );
-            
-            // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-            
-            // TODO: play the card in the user interface.
-        },    
-        
-        */
+      // Move kam to target position
+      this.moveKamToCoordinate(x, y);
+      this.moveAndDestroyTokenToPlayerInformationArea(x, y, opponentId);
+
+      this.updateInformationZone(null, true);
+
+      // Reorganize player information area to represent current game state
+      const playerTokenState = Object.groupBy(
+        tokenState.filter(
+          (token) => token.location !== "spent" && token.location !== "board"
+        ),
+        ({ location }) => location
+      );
+
+      for (const playerId in players) {
+        const tokenAmounts = this.playerTokenAmounts(
+          playerTokenState[playerId],
+          tokenTypes
+        );
+
+        for (const [tokenType, tokenAmount] of tokenAmounts) {
+          const [playerTokenElement, playerTokenAmountElement] =
+            document.getElementById(
+              `player_${playerId}_token_${tokenType}_wrapper`
+            ).children;
+
+          if (tokenAmount) {
+            dojo.removeClass(playerTokenElement, "low_opacity");
+            dojo.removeClass(playerTokenAmountElement, "hidden");
+          } else {
+            dojo.addClass(playerTokenElement, "low_opacity");
+            dojo.addClass(playerTokenAmountElement, "hidden");
+          }
+
+          playerTokenAmountElement.innerText = tokenAmount;
+        }
+      }
+    },
   });
 });

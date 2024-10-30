@@ -71,38 +71,30 @@ class iye extends Table
             $this->removeSpentTokenFromPlayerId($spent_token, $player_id);
         }
 
-        $this->notifyAllPlayers(
-            "moveKam",
-            clienttranslate('${player_name} moves kam.'),
-            array(
-                'player_id' => $player_id,
-                'player_name' => $this->getActivePlayerName(),
-            )
-        );
+
+        $tokenState = $this->getTokenStateFromDB();
 
         $this->notifyAllPlayers(
-            "spentToken",
+            "playerTurn",
             $spent_token === "basic" ?
-                clienttranslate('${player_name} uses basic movement for moving kam.') :
-                clienttranslate('${player_name} spends ${spent_token} for moving kam.'),
+                clienttranslate('${playerName} moves kam to (${x}, ${y}) coordinates with basic movement. ${opponentName} receives ${targetToken.type}.') :
+                clienttranslate('${playerName} moves kam to (${x}, ${y}) coordinates with ${spentToken} movement. ${opponentName} receives ${targetToken.type}.'),
             array(
-                'player_id' => $player_id,
-                'player_name' => $this->getActivePlayerName(),
-                'spent_token' => $spent_token
+                'playerId' => $player_id,
+                'playerName' => $this->getActivePlayerName(),
+                'opponentId' => $opponent_id,
+                'opponentName' => $this->getPlayerNameById($opponent_id),
+                'x' => $x,
+                'y' => $y,
+                'spentToken' => $spent_token,
+                'targetToken' => $target_token,
+                'tokenState' => $tokenState,
+                'tokenTypes' => $this->token_types,
+                'players' => $this->loadPlayersBasicInfos()
             )
         );
 
-        $this->notifyAllPlayers(
-            "receivedToken",
-            clienttranslate('${opponent_name} receives ${targetToken.type}.'),
-            array(
-                'player_id' => $player_id,
-                'player_name' => $this->getActivePlayerName(),
-                'opponent_id' => $opponent_id,
-                'opponent_name' => $this->getPlayerNameById($opponent_id),
-                'targetToken' => $target_token
-            )
-        );
+        $this->gamestate->nextState("nextPlayer");
     }
 
     /**
@@ -152,9 +144,15 @@ class iye extends Table
 
         $this->activeNextPlayer();
 
+        // TODO GAME END Condition
+        $possibleKamMovements = $this->getPossibleKamMovements(intval($this->getActivePlayerId()));
+        if (empty($possibleKamMovements)) {
+            var_dump("GAME IS FINISHED");
+        }
+
         // Go to another gamestate
         // Here, we would detect if the game is over, and in this case use "endGame" transition instead 
-        $this->gamestate->nextState("nextPlayer");
+        $this->gamestate->nextState("nextTurn");
     }
 
     /**
@@ -215,7 +213,7 @@ class iye extends Table
         );
         $result["materialInfo"] = $material_info;
 
-        $token_state_from_db = self::getObjectListFromDB("SELECT type type, location location, x x, y y FROM token");
+        $token_state_from_db = $this->getTokenStateFromDB();
         $result["tokenState"] = $this->groupBy($token_state_from_db, "location");
 
 
@@ -391,6 +389,15 @@ class iye extends Table
     {
         $board_state_sql = "SELECT * FROM token where location='board'";
         return self::getObjectListFromDB($board_state_sql);
+    }
+
+    /** 
+     * Retrieves token state from DB
+     */
+    protected function getTokenStateFromDB()
+    {
+        $sql = "SELECT type type, location location, x x, y y FROM token";
+        return self::getObjectListFromDB($sql);
     }
 
     /**
