@@ -47,26 +47,5 @@ class view_iye_iye extends game_view
     public function build_page($viewArgs)
     {
         $template = self::getGameName() . "_" . self::getGameName();
-        $players = $this->game->players;
-        $token_types = $this->game->token_types;
-
-        $this->page->begin_block($template, "player_tokens");
-        $this->page->begin_block($template, "player_zones");
-
-        foreach ($players as $player_id => $player) {
-            $this->page->reset_subblocks("player_tokens");
-            foreach ($token_types as $token_type => $token) {
-                $this->page->insert_block("player_tokens", array(
-                    'PLAYER_ID' => $player_id,
-                    'TOKEN_TYPE' => $token_type
-                ));
-            }
-
-            $this->page->insert_block('player_zones', array(
-                'PLAYER_ID' => $player_id,
-                'PLAYER_NAME' => $player["player_name"],
-                'PLAYER_COLOR' => $player["player_color"]
-            ));
-        }
     }
 }

@@ -1,18 +1,11 @@
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * iye implementation : © <Your name here> <Your email address here>
+ * iye implementation : © Mustafa Yilmaz - musyilmaz.dev@gmail.com
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
- *
- * iye.js
- *
- * iye user interface script
- *
- * In this file, you are describing the logic of your user interface, in Javascript language.
- *
  */
 
 const PLAYER_MOVE_KAM = "playerMoveKam";
@@ -28,61 +21,20 @@ define([
   return declare("bgagame.iye", ebg.core.gamegui, {
     constructor: function () {
       console.log("iye constructor");
-
-      // Here, you can init the global variables of your user interface
-      // Example:
-      // this.myGlobalValue = 0;
     },
-
-    /*
-            setup:
-            
-            This method must set up the game user interface according to current game situation specified
-            in parameters.
-            
-            The method is called each time the game interface is displayed to a player, ie:
-            _ when the game starts
-            _ when a player refreshes the game page (F5)
-            
-            "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
-        */
-
     setup: function (gamedatas) {
-      console.log("Starting game setup");
+      const {
+        players,
+        playerTokenState,
+        materialInfo: { tokenTypes },
+      } = gamedatas;
 
-      // Setting up player boards
-      for (let player_id in gamedatas.players) {
-        const player = gamedatas.players[player_id];
-        this.getPlayerPanelElement(player_id).innerHTML = this.format_block(
-          "jstpl_player_board",
-          {
-            player_id,
-            sun: { present: "full_opacity", amount: 4 },
-            horse: { present: "low_opacity", amount: 0 },
-            tree: { present: "full_opacity", amount: 1 },
-            water: { present: "full_opacity", amount: 1 },
-            owl: { present: "full_opacity", amount: 1 },
-          }
-        );
-      }
-
-      // TODO: Set up your game interface here, according to "gamedatas"
-
+      this.setupPlayerBoards(players, playerTokenState, tokenTypes);
       this.setupGameBoard(gamedatas.materialInfo.board);
       this.setupTokens(gamedatas);
 
-      // Setup game notifications to handle (see "setupNotifications" method below)
       this.setupNotifications();
-
-      console.log("Ending game setup");
     },
-
-    ///////////////////////////////////////////////////
-    //// Game & client states
-
-    // onEnteringState: this method is called each time we are entering into a new game state.
-    //                  You can use this method to perform some user interface changes at this moment.
-    //
     onEnteringState: function (stateName, args) {
       switch (stateName) {
         case PLAYER_MOVE_KAM: {
@@ -101,10 +53,6 @@ define([
         }
       }
     },
-
-    // onLeavingState: this method is called each time we are leaving a game state.
-    //                 You can use this method to perform some user interface changes at this moment.
-    //
     onLeavingState: function (stateName) {
       switch (stateName) {
         case PLAYER_MOVE_KAM: {
@@ -118,10 +66,6 @@ define([
         }
       }
     },
-
-    // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
-    //                        action status bar (ie: the HTML links in the status bar).
-    //
     onUpdateActionButtons: function (stateName, args) {
       if (this.isCurrentPlayerActive()) {
         switch (stateName) {
@@ -182,11 +126,34 @@ define([
         }
       }
     },
+    ///////////////////////////////////////////////////
+    //// Utility Functions
+    ///////////////////////////////////////////////////
+    setupPlayerBoards: function (players, playerTokenState, tokenTypes) {
+      for (playerId in players) {
+        const playerTokens = {};
 
-    ///////////////////////////////////////////////////
-    //// Utility methods
-    ///////////////////////////////////////////////////
-    getSquareElement: function (x, y, left, top) {
+        Object.values(tokenTypes).map((token) => {
+          const tokens = playerTokenState.filter(
+            (pts) => pts.player === playerId && pts.type === token.type
+          );
+
+          playerTokens[token.type] = {
+            present: tokens.length > 0 ? "full_opacity" : "low_opacity",
+            amount: tokens.length,
+          };
+        });
+
+        this.getPlayerPanelElement(playerId).innerHTML = this.format_block(
+          "jstpl_player_board",
+          {
+            playerId,
+            ...playerTokens,
+          }
+        );
+      }
+    },
+    squareElement: function (x, y, left, top) {
       return `<div id="square_${x}_${y}" class="iye_square" style="left: ${left}px; top: ${top}px;"></div>`;
     },
     setupGameBoard: function (board) {
@@ -200,7 +167,7 @@ define([
 
           gameboard.insertAdjacentHTML(
             `afterbegin`,
-            this.getSquareElement(x, y, left, top)
+            this.squareElement(x, y, left, top)
           );
         }
       }
@@ -211,30 +178,6 @@ define([
       tokenState["board"].map((token) => {
         this.placeTokenOnBoard(token);
       });
-
-      for (const playerId in players) {
-        const tokenAmounts = this.playerTokenAmounts(
-          tokenState[playerId],
-          materialInfo.tokenTypes
-        );
-
-        for (const [tokenType, tokenAmount] of tokenAmounts) {
-          const [playerTokenElement, playerTokenAmountElement] =
-            document.getElementById(
-              `player_${playerId}_token_${tokenType}_wrapper`
-            ).children;
-
-          if (tokenAmount) {
-            dojo.removeClass(playerTokenElement, "low_opacity");
-            dojo.removeClass(playerTokenAmountElement, "hidden");
-          } else {
-            dojo.addClass(playerTokenElement, "low_opacity");
-            dojo.addClass(playerTokenAmountElement, "hidden");
-          }
-
-          playerTokenAmountElement.innerText = tokenAmount;
-        }
-      }
     },
     placeTokenOnBoard: function (token) {
       const { x, y, type } = token;
@@ -255,24 +198,6 @@ define([
 
         this.placeOnObject(`token_${x}_${y}`, `square_${x}_${y}`);
       }
-    },
-    playerTokenAmounts: function (playerTokens, tokenTypes) {
-      const tokenAmounts = new Map();
-
-      for (const tokenType in tokenTypes) {
-        tokenAmounts.set(tokenType, 0);
-      }
-
-      if (!playerTokens) return tokenAmounts;
-
-      for (const playerToken of playerTokens) {
-        tokenAmounts.set(
-          playerToken.type,
-          tokenAmounts.get(playerToken.type) + 1
-        );
-      }
-
-      return tokenAmounts;
     },
     updatePossibleKamCoordinates: function (possibleCoordinates) {
       if (!this.isCurrentPlayerActive()) return;
@@ -299,9 +224,6 @@ define([
         );
       }
     },
-
-    ///////////////////////////////////////////////////
-    //// Player's action
     onMoveKamToCoordinate: function (event, coordinateInfo) {
       event.preventDefault();
       event.stopPropagation();
@@ -337,7 +259,6 @@ define([
         });
       }
     },
-
     resetSelectedTargetSquare: function () {
       document
         .querySelectorAll(".selected_possible_coordinate")
@@ -348,11 +269,7 @@ define([
     },
     getKamTokenState: function () {
       const { tokenState } = this.gamedatas;
-      const kamToken = tokenState["board"].find(
-        (token) => token.type === "kam"
-      );
-
-      return kamToken;
+      return tokenState["board"].find((token) => token.type === "kam");
     },
     moveKamToCoordinate: function (x, y) {
       const targetSquare = document.getElementById(`square_${x}_${y}`);
@@ -363,12 +280,9 @@ define([
       const kamToken = document.getElementsByClassName("kam")[0];
       this.slideToObject(kamToken, targetSquare).play();
     },
-    moveAndDestroyTokenToPlayerInformationArea: function (x, y, playerId) {
+    fadeOutAndDestroyToken: function (x, y) {
       const targetToken = document.getElementById(`token_${x}_${y}`);
-      const playerInformationArea = document.getElementById(
-        `player_${playerId}`
-      );
-      this.slideToObjectAndDestroy(targetToken, playerInformationArea, 500, 0);
+      this.fadeOutAndDestroy(targetToken, 500, 0);
     },
     createInformationForTokenPassingToOpponent: function (x, y) {
       const tokenAtTargetSquare = document
@@ -424,7 +338,6 @@ define([
     capitalizeWord: function (word) {
       return word.charAt(0).toUpperCase() + word.slice(1);
     },
-
     setupNotifications: function () {
       const notifications = [["playerTurn", 1000]];
 
@@ -435,7 +348,7 @@ define([
       });
     },
     notif_playerTurn: function (notification) {
-      const { x, y, tokenState, tokenTypes, players, opponentId } =
+      const { x, y, playerTokenState, tokenTypes, players, opponentId } =
         notification.args;
 
       // Remove possible moves from previous state
@@ -451,43 +364,12 @@ define([
           });
       }
 
-      // Move kam to target position
       this.moveKamToCoordinate(x, y);
-      this.moveAndDestroyTokenToPlayerInformationArea(x, y, opponentId);
+      this.fadeOutAndDestroyToken(x, y);
 
       this.updateInformationZone(null, true);
 
-      // Reorganize player information area to represent current game state
-      const playerTokenState = Object.groupBy(
-        tokenState.filter(
-          (token) => token.location !== "spent" && token.location !== "board"
-        ),
-        ({ location }) => location
-      );
-
-      for (const playerId in players) {
-        const tokenAmounts = this.playerTokenAmounts(
-          playerTokenState[playerId],
-          tokenTypes
-        );
-
-        for (const [tokenType, tokenAmount] of tokenAmounts) {
-          const [playerTokenElement, playerTokenAmountElement] =
-            document.getElementById(
-              `player_${playerId}_token_${tokenType}_wrapper`
-            ).children;
-
-          if (tokenAmount) {
-            dojo.removeClass(playerTokenElement, "low_opacity");
-            dojo.removeClass(playerTokenAmountElement, "hidden");
-          } else {
-            dojo.addClass(playerTokenElement, "low_opacity");
-            dojo.addClass(playerTokenAmountElement, "hidden");
-          }
-
-          playerTokenAmountElement.innerText = tokenAmount;
-        }
-      }
+      this.setupPlayerBoards(players, playerTokenState, tokenTypes);
     },
   });
 });

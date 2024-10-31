@@ -66,11 +66,10 @@
 
 .iye_player_board {
   width: auto;
-  height: 40px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
   padding: 10px 10px 20px 10px;
 }
@@ -86,9 +85,9 @@
 .iye_player_board > .player_board_token > .amount {
   position: absolute;
   bottom: -16px;
-  left: 4px;
-  width: 24px;
-  height: 24px;
+  left: 6px;
+  width: 20px;
+  height: 20px;
   display: flex;
   justify-content: center;
   align-items: center;

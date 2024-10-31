@@ -3,17 +3,11 @@
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * iye implementation : © <Your name here> <Your email address here>
+ * iye implementation : © Mustafa Yilmaz - musyilmaz.dev@gmail.com
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
- *
- * iye.game.php
- *
- * This is the main file for your game logic.
- *
- * In this PHP file, you are going to defines the rules of the game.
  */
 
 declare(strict_types=1);
@@ -49,190 +43,21 @@ class iye extends Table
         ]);
     }
 
-    /**
-     * Player action, example content.
-     *
-     * In this scenario, each time a player plays a card, this method will be called. This method is called directly
-     * by the action trigger on the front side with `bgaPerformAction`.
-     *
-     * @throws BgaSystemException
-     * @see action_iye::actMyAction
-     */
-    public function actPlayerMoveKam(int $x, int $y, string $spent_token)
-    {
-        $player_id = intval($this->getActivePlayerId());
-        $opponent_id = $this->getOpponentId($player_id);
-        $target_token = $this->getTokenAtCoordinate($x, $y);
-
-
-        $this->updateKamPositionInDB($x, $y);
-        $this->updateTokenPositionToPlayerId($x, $y, $opponent_id);
-        if ($spent_token !== "basic") {
-            $this->removeSpentTokenFromPlayerId($spent_token, $player_id);
-        }
-
-
-        $tokenState = $this->getTokenStateFromDB();
-
-        $this->notifyAllPlayers(
-            "playerTurn",
-            $spent_token === "basic" ?
-                clienttranslate('${playerName} moves kam to (${x}, ${y}) coordinates with basic movement. ${opponentName} receives ${targetToken.type}.') :
-                clienttranslate('${playerName} moves kam to (${x}, ${y}) coordinates with ${spentToken} movement. ${opponentName} receives ${targetToken.type}.'),
-            array(
-                'playerId' => $player_id,
-                'playerName' => $this->getActivePlayerName(),
-                'opponentId' => $opponent_id,
-                'opponentName' => $this->getPlayerNameById($opponent_id),
-                'x' => $x,
-                'y' => $y,
-                'spentToken' => $spent_token,
-                'targetToken' => $target_token,
-                'tokenState' => $tokenState,
-                'tokenTypes' => $this->token_types,
-                'players' => $this->loadPlayersBasicInfos()
-            )
-        );
-
-        $this->gamestate->nextState("nextPlayer");
-    }
-
-    /**
-     * Game state arguments, example content.
-     *
-     * This method returns some additional information that is very specific to the `playerTurn` game state.
-     *
-     * @return string[]
-     * @see ./states.inc.php
-     */
-    public function argPlayerMoveKam(): array
-    {
-        return [
-            "possibleCoordinates" => $this->getPossibleKamMovements(intval($this->getActivePlayerId()))
-        ];
-    }
-
-    /**
-     * Compute and return the current game progression.
-     *
-     * The number returned must be an integer between 0 and 100.
-     *
-     * This method is called each time we are in a game state with the "updateGameProgression" property set to true.
-     *
-     * @return int
-     * @see ./states.inc.php
-     */
-    public function getGameProgression()
-    {
-        // TODO: compute and return the game progression
-
-        return 0;
-    }
-
-    /**
-     * Game state action, example content.
-     *
-     * The action method of state `nextPlayer` is called everytime the current game state is set to `nextPlayer`.
-     */
-    public function stNextPlayer(): void
-    {
-        // Retrieve the active player ID.
-        $player_id = (int)$this->getActivePlayerId();
-
-        // Give some extra time to the active player when he completed an action
-        $this->giveExtraTime($player_id);
-
-        $this->activeNextPlayer();
-
-        // TODO GAME END Condition
-        $possibleKamMovements = $this->getPossibleKamMovements(intval($this->getActivePlayerId()));
-        if (empty($possibleKamMovements)) {
-            var_dump("GAME IS FINISHED");
-        }
-
-        // Go to another gamestate
-        // Here, we would detect if the game is over, and in this case use "endGame" transition instead 
-        $this->gamestate->nextState("nextTurn");
-    }
-
-    /**
-     * Migrate database.
-     *
-     * You don't have to care about this until your game has been published on BGA. Once your game is on BGA, this
-     * method is called everytime the system detects a game running with your old database scheme. In this case, if you
-     * change your database scheme, you just have to apply the needed changes in order to update the game database and
-     * allow the game to continue to run with your new version.
-     *
-     * @param int $from_version
-     * @return void
-     */
-    public function upgradeTableDb($from_version)
-    {
-        //       if ($from_version <= 1404301345)
-        //       {
-        //            // ! important ! Use DBPREFIX_<table_name> for all tables
-        //
-        //            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
-        //            $this->applyDbUpgradeToAllDB( $sql );
-        //       }
-        //
-        //       if ($from_version <= 1405061421)
-        //       {
-        //            // ! important ! Use DBPREFIX_<table_name> for all tables
-        //
-        //            $sql = "CREATE TABLE DBPREFIX_xxxxxxx ....";
-        //            $this->applyDbUpgradeToAllDB( $sql );
-        //       }
-    }
-
-    /*
-     * Gather all information about current game situation (visible by the current player).
-     *
-     * The method is called each time the game interface is displayed to a player, i.e.:
-     *
-     * - when the game starts
-     * - when a player refreshes the game page (F5)
-     */
-    protected function getAllDatas()
-    {
-        $result = [];
-
-        // WARNING: We must only return information visible by the current player.
-        $current_player_id = (int) $this->getCurrentPlayerId();
-
-        // Get information about players.
-        // NOTE: you can retrieve some extra field you added for "player" table in `dbmodel.sql` if you need it.
-        $result["players"] = $this->getCollectionFromDb(
-            "SELECT player_id, player_score score FROM player"
-        );
-
-        $material_info = array(
-            "tokenTypes" => $this->token_types,
-            "kam" => $this->kam,
-            "board" => $this->board
-        );
-        $result["materialInfo"] = $material_info;
-
-        $token_state_from_db = $this->getTokenStateFromDB();
-        $result["tokenState"] = $this->groupBy($token_state_from_db, "location");
-
-
-        return $result;
-    }
-
-    /**
-     * Returns the game name.
-     *
-     * IMPORTANT: Please do not modify.
-     */
     protected function getGameName()
     {
         return "iye";
     }
 
+    public function getGameProgression()
+    {
+        // TODO Calculate game progression 
+        return 0;
+    }
+
     /**
-     * This method is called only once, when a new game is launched. In this method, you must setup the game
-     *  according to the game rules, so that the game is ready to be played.
+     * Setup New Game
+     *
+     * Fires only once for setting up a new game
      */
     protected function setupNewGame($players, $options = [])
     {
@@ -287,6 +112,162 @@ class iye extends Table
         // Activate first player once everything has been initialized and ready.
         $this->activeNextPlayer();
     }
+
+    /*
+     * Gather all information about current game situation (visible by the current player).
+     *
+     * The method is called each time the game interface is displayed to a player, i.e.:
+     *
+     * - when the game starts
+     * - when a player refreshes the game page (F5)
+     */
+    protected function getAllDatas()
+    {
+        $result = [];
+
+        // WARNING: We must only return information visible by the current player.
+        $current_player_id = (int) $this->getCurrentPlayerId();
+
+        // Get information about players.
+        // NOTE: you can retrieve some extra field you added for "player" table in `dbmodel.sql` if you need it.
+        $result["players"] = $this->getCollectionFromDb(
+            "SELECT player_id, player_score score FROM player"
+        );
+
+        $material_info = array(
+            "tokenTypes" => $this->token_types,
+            "kam" => $this->kam,
+            "board" => $this->board
+        );
+        $result["materialInfo"] = $material_info;
+
+        $token_state_from_db = $this->getTokenStateFromDB();
+        $result["tokenState"] = $this->groupBy($token_state_from_db, "location");
+
+        $result["playerTokenState"] = $this->getPlayerTokenStateFromDB();
+
+        return $result;
+    }
+
+    /**
+     * Game State :: STATE_PLAYER_MOVE_KAM
+     *
+     * Returns possible coordinates for active player to client side
+     */
+    public function argPlayerMoveKam(): array
+    {
+        return [
+            "possibleCoordinates" => $this->getPossibleKamMovements(intval($this->getActivePlayerId()))
+        ];
+    }
+
+    /**
+     * Game State :: STATE_NEXT_PLAYER
+     * This is an automated game state
+     *
+     * Switches activePlayer & checks for endgame condition
+     */
+    public function stNextPlayer(): void
+    {
+        // Retrieve the active player ID.
+        $player_id = (int)$this->getActivePlayerId();
+
+        // Give some extra time to the active player when he completed an action
+        $this->giveExtraTime($player_id);
+
+        $this->activeNextPlayer();
+
+        // TODO GAME END Condition
+        $possibleKamMovements = $this->getPossibleKamMovements(intval($this->getActivePlayerId()));
+        if (empty($possibleKamMovements)) {
+            var_dump("GAME IS FINISHED");
+        }
+
+        // Go to another gamestate
+        // Here, we would detect if the game is over, and in this case use "endGame" transition instead 
+        $this->gamestate->nextState("nextTurn");
+    }
+
+    /**
+     * Player Action :: playerMoveKam
+     *
+     * Writes player action of kam movement to DB in proper places
+     * Handle effects like spending token, giving token to opponent
+     * Notify all players about the applied movement
+     */
+    public function actPlayerMoveKam(int $x, int $y, string $spent_token)
+    {
+        $player_id = intval($this->getActivePlayerId());
+        $opponent_id = $this->getOpponentId($player_id);
+        $target_token = $this->getTokenAtCoordinate($x, $y);
+
+
+        $this->updateKamPositionInDB($x, $y);
+        $this->updateTokenPositionToPlayerId($x, $y, $opponent_id);
+        if ($spent_token !== "basic") {
+            $this->removeSpentTokenFromPlayerId($spent_token, $player_id);
+        }
+
+
+        $tokenState = $this->getTokenStateFromDB();
+
+        $this->notifyAllPlayers(
+            "playerTurn",
+            $spent_token === "basic" ?
+                clienttranslate('${playerName} moves kam to (${x}, ${y}) coordinates with basic movement. ${opponentName} receives ${targetToken.type}.') :
+                clienttranslate('${playerName} moves kam to (${x}, ${y}) coordinates with ${spentToken} movement. ${opponentName} receives ${targetToken.type}.'),
+            array(
+                'playerId' => $player_id,
+                'playerName' => $this->getActivePlayerName(),
+                'opponentId' => $opponent_id,
+                'opponentName' => $this->getPlayerNameById($opponent_id),
+                'x' => $x,
+                'y' => $y,
+                'spentToken' => $spent_token,
+                'targetToken' => $target_token,
+                'tokenState' => $tokenState,
+                'tokenTypes' => $this->token_types,
+                'players' => $this->loadPlayersBasicInfos(),
+                'playerTokenState' => $this->getPlayerTokenStateFromDB()
+            )
+        );
+
+        $this->gamestate->nextState("nextPlayer");
+    }
+
+    /**
+     * Migrate database.
+     *
+     * You don't have to care about this until your game has been published on BGA. Once your game is on BGA, this
+     * method is called everytime the system detects a game running with your old database scheme. In this case, if you
+     * change your database scheme, you just have to apply the needed changes in order to update the game database and
+     * allow the game to continue to run with your new version.
+     *
+     * @param int $from_version
+     * @return void
+     */
+    public function upgradeTableDb($from_version)
+    {
+        //       if ($from_version <= 1404301345)
+        //       {
+        //            // ! important ! Use DBPREFIX_<table_name> for all tables
+        //
+        //            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
+        //            $this->applyDbUpgradeToAllDB( $sql );
+        //       }
+        //
+        //       if ($from_version <= 1405061421)
+        //       {
+        //            // ! important ! Use DBPREFIX_<table_name> for all tables
+        //
+        //            $sql = "CREATE TABLE DBPREFIX_xxxxxxx ....";
+        //            $this->applyDbUpgradeToAllDB( $sql );
+        //       }
+    }
+
+    /********************
+     * UTILITY FUNCTIONS
+     */
 
     protected function setupInitialTokens()
     {
@@ -398,6 +379,16 @@ class iye extends Table
     {
         $sql = "SELECT type type, location location, x x, y y FROM token";
         return self::getObjectListFromDB($sql);
+    }
+
+    protected function getPlayerTokenStateFromDB()
+    {
+        $sql = "SELECT * FROM token WHERE NOT location='board' AND NOT location='spent'";
+        $player_token_state =  self::getObjectListFromDB($sql);
+
+        return array_map(function ($row) {
+            return ["player" => $row["location"], "type" => $row["type"]];
+        }, $player_token_state);
     }
 
     /**
