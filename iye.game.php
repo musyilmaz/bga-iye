@@ -51,7 +51,7 @@ class iye extends Table
     public function getGameProgression()
     {
         $board_state = $this->getBoardStateFromDB();
-        return ($this->game_length - count($board_state)) * 100 / count($board_state);
+        return ($this->game_length - count($board_state)) * 100 / $this->game_length;
     }
 
     /**
@@ -210,6 +210,8 @@ class iye extends Table
 
         $tokenState = $this->getTokenStateFromDB();
 
+        $player_scores = $this->calculatePlayerScores();
+
         $this->notifyAllPlayers(
             "playerTurn",
             $spent_token === "basic" ?
@@ -227,7 +229,8 @@ class iye extends Table
                 'tokenState' => $tokenState,
                 'tokenTypes' => $this->token_types,
                 'players' => $this->loadPlayersBasicInfos(),
-                'playerTokenState' => $this->getPlayerTokenStateFromDB()
+                'playerTokenState' => $this->getPlayerTokenStateFromDB(),
+                'playerScores' => $player_scores
             )
         );
 
@@ -645,6 +648,69 @@ class iye extends Table
     {
         $sql = "UPDATE token SET location='spent' WHERE location='$player_id' AND type='$token' LIMIT 1";
         $this->DbQuery($sql);
+    }
+
+    protected function getPlayerIds()
+    {
+        $players = $this->loadPlayersBasicInfos();
+        return array_keys($players);
+    }
+
+    protected function getTokenStateOfPlayersFromDB($token)
+    {
+        $sql = "SELECT * FROM token WHERE type='$token' AND NOT location='board' AND NOT location='spent'";
+        return self::getObjectListFromDB($sql);
+    }
+
+    protected function initializedPlayerScores()
+    {
+        $init_player_scores = array();
+        foreach ($this->getPlayerIds() as $player_id) {
+            $init_player_scores[$player_id] = 0;
+        }
+
+        return $init_player_scores;
+    }
+
+    protected function setPlayerScoresToDB($player_id, $score)
+    {
+        $sql = "UPDATE player SET player_score=$score WHERE player_id='$player_id'";
+        $this->DbQuery($sql);
+    }
+
+    protected function calculatePlayerScores()
+    {
+        list($first_player_id, $second_player_id) = $this->getPlayerIds();
+
+        $player_scores = $this->initializedPlayerScores();
+
+        foreach (array_values($this->token_types) as $token) {
+            $token_state_of_players =  $this->getTokenStateOfPlayersFromDB($token["type"]);
+            $token_counts_by_player_id = array_reduce($token_state_of_players, function ($acc, $token) {
+                $acc[$token["location"]] += 1;
+                return $acc;
+            }, $this->initializedPlayerScores());
+
+            $first_player_count = $token_counts_by_player_id[$first_player_id];
+            $second_player_count = $token_counts_by_player_id[$second_player_id];
+
+            if ($first_player_count === $second_player_count) {
+                continue;
+            }
+            if ($first_player_count > $second_player_count) {
+                $player_scores[$first_player_id] += $token["points"];
+            }
+            if ($second_player_count > $first_player_count) {
+                $player_scores[$second_player_id] += $token["points"];
+            }
+        }
+
+        foreach ($player_scores as $player_id => $score) {
+            $this->setPlayerScoresToDB($player_id, $score);
+        }
+
+
+        return $player_scores;
     }
 
     /**
