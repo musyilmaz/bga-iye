@@ -1,7 +1,7 @@
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * iye implementation : © <Your name here> <Your email address here>
+ * iye implementation : © Mus <Your email address here>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -13,79 +13,60 @@
  *
  */
 
-/*
-    This is the CSS stylesheet of your game User Interface.
-    
-    Styles defined on this file will be applied to the HTML elements you define in your
-    HTML template (iye_iye.tpl), and to HTML elements you create dynamically
-    (in iye.js).
-    
-    Usually, you are using CSS to:
-    
-    1°) define the overall layout of your game
-        (ex: place the board on the top left, place player's hand beside, place the deck on the right, ...).
-
-    2°) create your CSS-sprites:
-        All images of your games should be gathered into a small number of image files. Then, using
-        background-image and background-position CSS properties, you create HTML blocks that can 
-        display these images correctly (see example below).
-    
-    3°) ... anything else:
-        It is really easy to add and remove CSS classes dynamically from your Javascript with
-        dojo.addClass and dojo.removeClass. It is also easy to check if an element has a class
-        (dojo.hasClass) or to get all elements with a specific class (dojo.query). This is why,
-        very often, using CSS classes for the logic of your user interface allow you to do complex
-        thing easily.
-        
-        
-     Note: on the production platform, this file will be compressed and comments will be removed.
-           Consequently, don't hesitate to put as many comments as necessary.
-*/
-
-/* Note: you must not use any @import directive */
-
-/********* You can start writing your CSS below this line: **********/
-
-/*
-    Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):
-
-    .white_token {
-        background-image: url('img/tokens.png');
-        background-position: 0px 0px;
-    }
-    .black_token {
-        background-image: url('img/tokens.png');
-        background-position: -20px 0px;
-    }
-    .token {
-        width: 20px;
-        height: 20px;
-        background-repeat: none;
-    }
-*/
-
+/**
+ *-------------------
+ * Player Panel Boards
+ *-------------------
+ */
 .iye_player_board {
-  width: auto;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 12px;
   padding: 10px 10px 20px 10px;
 }
 
 .iye_player_board > .player_board_token {
   position: relative;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   background-image: url("img/tokens.jpg");
   background-size: auto 100%;
 }
 
-.iye_player_board > .player_board_token > .amount {
+.player_board_token[data-present="true"] {
+  opacity: 1;
+}
+
+.player_board_token[data-present="false"] {
+  opacity: 0.2;
+}
+
+.player_board_token[data-token-type="owl"] {
+  background-position-x: 0px;
+}
+
+.player_board_token[data-token-type="water"] {
+  background-position-x: -40px;
+}
+
+.player_board_token[data-token-type="tree"] {
+  background-position-x: -80px;
+}
+
+.player_board_token[data-token-type="horse"] {
+  background-position-x: -120px;
+}
+
+.player_board_token[data-token-type="sun"] {
+  background-position-x: -160px;
+}
+
+.player_board_token > .amount {
   position: absolute;
-  bottom: -16px;
-  left: 6px;
+  bottom: -20px;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 20px;
   height: 20px;
   display: flex;
@@ -99,176 +80,28 @@
   color: black;
 }
 
-.player_board_token[data-token-type="owl"] {
-  background-position-x: 0px;
+.player_board_token > .amount[data-present="true"] {
+  opacity: 1;
 }
 
-.player_board_token[data-token-type="water"] {
-  background-position-x: -32px;
+.player_board_token > .amount[data-present="false"] {
+  opacity: 0;
 }
 
-.player_board_token[data-token-type="tree"] {
-  background-position-x: -64px;
-}
-
-.player_board_token[data-token-type="horse"] {
-  background-position-x: -96px;
-}
-
-.player_board_token[data-token-type="sun"] {
-  background-position-x: -128px;
-}
+/**
+ *-------------------
+ * Play Area
+ *-------------------
+ */
 
 .play_area_wrapper {
   display: flex;
   margin: 0 auto;
   height: 800px;
   width: 1200px;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-}
-
-#information_zone_wrapper {
-  width: 420px;
-  height: 720px;
-  display: flex;
   flex-direction: column;
   justify-content: space-between;
-}
-
-.token_transfer_information {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-end;
-  gap: 20px;
-}
-
-.token_spend_information {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 20px;
-}
-
-.information_title {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: flex-end;
-  gap: 20px;
-}
-
-.title {
-  font-weight: 700;
-}
-
-.information_token {
-  width: 40px;
-  height: 40px;
-  background-image: url("img/tokens.jpg");
-  background-size: auto 100%;
-}
-
-.information_token[data-token-type="owl"] {
-  background-position-x: 0px;
-}
-
-.information_token[data-token-type="water"] {
-  background-position-x: -40px;
-}
-
-.information_token[data-token-type="tree"] {
-  background-position-x: -80px;
-}
-
-.information_token[data-token-type="horse"] {
-  background-position-x: -120px;
-}
-
-.information_token[data-token-type="sun"] {
-  background-position-x: -160px;
-}
-
-#player_zone_wrapper {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 40px;
-}
-
-.player_board {
-  position: relative;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 60px;
-}
-
-.player_board > .player_name {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-weight: bold;
-}
-
-.token_zone {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 20px;
-  height: 80px;
-}
-
-.token_zone > .player_token_wrapper {
-  position: relative;
-  width: 60px;
-  height: 60px;
-}
-
-.token_zone > .player_token_wrapper > .player_token {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  background-image: url("img/tokens.jpg");
-  background-size: auto 100%;
-}
-
-.token_zone > .player_token_wrapper > .player_token_amount {
-  position: absolute;
-  bottom: -12px;
-  right: -6px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  background-color: white;
-  border: 1px solid black;
-  border-radius: 50%;
-  font-size: 14px;
-  font-weight: 700;
-  color: black;
-}
-
-.token_zone > .player_token_wrapper > .player_token[data-token-type="owl"] {
-  background-position-x: 0px;
-}
-
-.token_zone > .player_token_wrapper > .player_token[data-token-type="water"] {
-  background-position-x: -60px;
-}
-
-.token_zone > .player_token_wrapper > .player_token[data-token-type="tree"] {
-  background-position-x: -120px;
-}
-
-.token_zone > .player_token_wrapper > .player_token[data-token-type="horse"] {
-  background-position-x: -180px;
-}
-
-.token_zone > .player_token_wrapper > .player_token[data-token-type="sun"] {
-  background-position-x: -240px;
 }
 
 #iye_board {
@@ -287,7 +120,7 @@
 }
 
 .possible_coordinate {
-  z-index: 20;
+  z-index: 2;
   box-sizing: border-box;
   border: 10px solid rgba(255, 255, 255, 1);
   background-color: rgba(255, 255, 255, 0.1);
@@ -310,6 +143,7 @@
   position: absolute;
   width: 72px;
   height: 72px;
+  z-index: 5;
   background-image: url("img/kam.png");
   background-size: auto 100%;
   background-position-x: -288px;
@@ -333,12 +167,4 @@
 
 .token[data-token-type="sun"] {
   background-position-x: -440px;
-}
-
-.low_opacity {
-  opacity: 0.2;
-}
-
-.hidden {
-  display: none !important;
 }

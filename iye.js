@@ -45,10 +45,6 @@ define([
           break;
         }
         case CLIENT_PLAYER_CONFIRM_MOVE: {
-          this.updateInformationZone(
-            this.createInformationForTokenToSpend(args.args.token),
-            false
-          );
           break;
         }
       }
@@ -139,7 +135,7 @@ define([
           );
 
           playerTokens[token.type] = {
-            present: tokens.length > 0 ? "full_opacity" : "low_opacity",
+            present: tokens.length > 0,
             amount: tokens.length,
           };
         });
@@ -216,12 +212,6 @@ define([
         targetSquare.addEventListener("click", (e) =>
           this.onMoveKamToCoordinate(e, coordinate)
         );
-
-        this.addTooltipToClass(
-          `possible_coordinate_${x}_${y}_tooltip`,
-          _("TODO this information"),
-          _("Change this information")
-        );
       }
     },
     onMoveKamToCoordinate: function (event, coordinateInfo) {
@@ -236,11 +226,6 @@ define([
 
       this.selectTargetSquare(targetSquare);
       this.moveKamToTargetSquare(targetSquare);
-
-      this.updateInformationZone(
-        this.createInformationForTokenPassingToOpponent(x, y),
-        true
-      );
 
       if (spendableTokens.length === 1) {
         const token = spendableTokens[0];
@@ -284,54 +269,10 @@ define([
       const targetToken = document.getElementById(`token_${x}_${y}`);
       this.fadeOutAndDestroy(targetToken, 500, 0);
     },
-    createInformationForTokenPassingToOpponent: function (x, y) {
-      const tokenAtTargetSquare = document
-        .getElementById(`token_${x}_${y}`)
-        .getAttribute("data-token-type");
-
-      return `
-        <div class="whiteblock token_transfer_information">
-          <span>Your opponent will get: </span>
-          <div class="information_token" data-token-type="${tokenAtTargetSquare}"></div>
-        </div>
-      `;
-    },
-    createInformationForTokenToSpend: function (token) {
-      if (token === "basic") {
-        return `
-          <div class="whiteblock token_spend_information">
-            <span class="title">Basic Movement</span>
-            No token is needed to complete this movement.
-          </div>
-        `;
-      } else {
-        return `
-          <div class="whiteblock token_spend_information">
-            <div class="information_title">
-              <span class="title">
-                ${this.capitalizeWord(token)} Movement
-              </span>
-              <div class="information_token" data-token-type="${token}"></div>
-            </div>
-            <span>You will spend ${token} token to complete this movement.</span>
-          </div>
-        `;
-      }
-    },
-    updateInformationZone: function (element, resetInformationZone) {
-      const informationZone = document.getElementById("information_zone");
-      if (resetInformationZone) {
-        informationZone.innerHTML = "";
-      }
-      if (element) {
-        informationZone.insertAdjacentHTML("afterbegin", element);
-      }
-    },
     resetTurn: function () {
       const kamToken = this.getKamTokenState();
 
       if (kamToken) this.moveKamToCoordinate(kamToken.x, kamToken.y);
-      this.updateInformationZone(null, true);
       this.resetSelectedTargetSquare();
       this.restoreServerGameState();
     },
@@ -366,8 +307,6 @@ define([
 
       this.moveKamToCoordinate(x, y);
       this.fadeOutAndDestroyToken(x, y);
-
-      this.updateInformationZone(null, true);
 
       this.setupPlayerBoards(players, playerTokenState, tokenTypes);
     },

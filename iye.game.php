@@ -208,7 +208,6 @@ class iye extends Table
             $this->removeSpentTokenFromPlayerId($spent_token, $player_id);
         }
 
-
         $tokenState = $this->getTokenStateFromDB();
 
         $this->notifyAllPlayers(
