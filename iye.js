@@ -66,7 +66,6 @@ define([
       if (this.isCurrentPlayerActive()) {
         switch (stateName) {
           case PLAYER_MOVE_KAM: {
-            console.log("UPDATE_ACTION_BUTTONS :: PLAYER_MOVE_KAM", args);
             break;
           }
           case CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE: {
@@ -76,10 +75,10 @@ define([
                 `confirm_${token}Spend`,
                 _(`Spend ${this.capitalizeWord(token)} Token`),
                 () => {
-                  this.setClientState(CLIENT_PLAYER_CONFIRM_MOVE, {
-                    descriptionmyturn: _("${you} must confirm your turn"),
-                    args: { x, y, token },
-                  });
+                  this.setClientState(
+                    CLIENT_PLAYER_CONFIRM_MOVE,
+                    this.argsClientPlayerConfirmMove(x, y, token)
+                  );
                 }
               );
             }
@@ -182,7 +181,7 @@ define([
 
       return playerScores;
     },
-    setupPlayerScores: function (players, playerTokenState, tokenTypes) {
+    updatePlayerScores: function (players, playerTokenState, tokenTypes) {
       const playerScores = this.calculatePlayerScores(
         players,
         playerTokenState,
@@ -252,7 +251,6 @@ define([
         const targetSquare = document.getElementById(`square_${x}_${y}`);
 
         targetSquare.classList.add("possible_coordinate");
-        targetSquare.classList.add(`possible_coordinate_${x}_${y}_tooltip`);
         targetSquare.addEventListener("click", (e) =>
           this.onMoveKamToCoordinate(e, coordinate)
         );
@@ -271,20 +269,15 @@ define([
       this.selectTargetSquare(targetSquare);
       this.moveKamToTargetSquare(targetSquare);
 
-      if (spendableTokens.length === 1) {
-        const token = spendableTokens[0];
-        this.setClientState(CLIENT_PLAYER_CONFIRM_MOVE, {
-          descriptionmyturn: _("${you} must confirm your turn"),
-          args: { x, y, token },
-        });
+      if (spendableTokens.includes("basic")) {
+        this.setClientState(
+          CLIENT_PLAYER_CONFIRM_MOVE,
+          this.argsClientPlayerConfirmMove(x, y, "basic")
+        );
       } else {
         this.setClientState(CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE, {
           descriptionmyturn: _("${you} must select a token to spend"),
-          args: {
-            x,
-            y,
-            spendableTokens,
-          },
+          args: { x, y, spendableTokens },
         });
       }
     },
@@ -323,6 +316,38 @@ define([
     capitalizeWord: function (word) {
       return word.charAt(0).toUpperCase() + word.slice(1);
     },
+    actionTokenElement: function (token) {
+      return `<div class="action-token" data-token-type="${token}"></div>`;
+    },
+    argsClientPlayerConfirmMove: function (x, y, token) {
+      const targetToken = document.getElementById(`token_${x}_${y}`).dataset
+        .tokenType;
+
+      if (token === "basic") {
+        return {
+          descriptionmyturn: _("Your opponent will get ${targetToken} token."),
+          args: {
+            x,
+            y,
+            token,
+            targetToken: this.actionTokenElement(targetToken),
+          },
+        };
+      }
+
+      return {
+        descriptionmyturn: _(
+          "${you} will spend ${spentToken} - Your opponent will get ${targetToken} token."
+        ),
+        args: {
+          x,
+          y,
+          token,
+          spentToken: this.actionTokenElement(token),
+          targetToken: this.actionTokenElement(targetToken),
+        },
+      };
+    },
     setupNotifications: function () {
       const notifications = [["playerTurn", 1000]];
 
@@ -353,7 +378,7 @@ define([
       this.fadeOutAndDestroyToken(x, y);
 
       this.setupPlayerBoards(players, playerTokenState, tokenTypes);
-      this.setupPlayerScores(players, playerTokenState, tokenTypes);
+      this.updatePlayerScores(players, playerTokenState, tokenTypes);
     },
   });
 });

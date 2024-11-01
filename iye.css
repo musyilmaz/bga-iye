@@ -123,7 +123,7 @@
   z-index: 2;
   box-sizing: border-box;
   border: 10px solid rgba(255, 255, 255, 1);
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.2);
   cursor: pointer;
 }
 
@@ -167,4 +167,34 @@
 
 .token[data-token-type="sun"] {
   background-position-x: -440px;
+}
+
+.action-token {
+  display: inline-block;
+  vertical-align: middle;
+  width: 40px;
+  height: 40px;
+  margin: 0px 8px;
+  background-image: url("img/tokens.jpg");
+  background-size: auto 100%;
+}
+
+.action-token[data-token-type="owl"] {
+  background-position-x: 0px;
+}
+
+.action-token[data-token-type="water"] {
+  background-position-x: -40px;
+}
+
+.action-token[data-token-type="tree"] {
+  background-position-x: -80px;
+}
+
+.action-token[data-token-type="horse"] {
+  background-position-x: -120px;
+}
+
+.action-token[data-token-type="sun"] {
+  background-position-x: -160px;
 }
