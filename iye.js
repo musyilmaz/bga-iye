@@ -149,6 +149,50 @@ define([
         );
       }
     },
+    calculatePlayerScores: function (players, playerTokenState, tokenTypes) {
+      function initPlayerScores(players) {
+        const playerScores = {};
+        Object.keys(players).map((playerId) => (playerScores[playerId] = 0));
+
+        return playerScores;
+      }
+
+      const playerScores = initPlayerScores(players);
+
+      Object.values(tokenTypes).map((token) => {
+        const tokens = playerTokenState.filter(
+          (pts) => pts.type === token.type
+        );
+
+        const tokenAmounts = Object.entries(
+          tokens.reduce((acc, obj) => {
+            acc[obj.player]++;
+            return acc;
+          }, initPlayerScores(players))
+        );
+
+        if (tokenAmounts[0][1] === tokenAmounts[1][1]) return;
+        if (tokenAmounts[0][1] > tokenAmounts[1][1]) {
+          playerScores[tokenAmounts[0][0]] += token.points;
+        }
+        if (tokenAmounts[1][1] > tokenAmounts[0][1]) {
+          playerScores[tokenAmounts[1][0]] += token.points;
+        }
+      });
+
+      return playerScores;
+    },
+    setupPlayerScores: function (players, playerTokenState, tokenTypes) {
+      const playerScores = this.calculatePlayerScores(
+        players,
+        playerTokenState,
+        tokenTypes
+      );
+
+      Object.keys(playerScores).map((playerId) => {
+        this.scoreCtrl[playerId].toValue(playerScores[playerId]);
+      });
+    },
     squareElement: function (x, y, left, top) {
       return `<div id="square_${x}_${y}" class="iye_square" style="left: ${left}px; top: ${top}px;"></div>`;
     },
@@ -309,6 +353,7 @@ define([
       this.fadeOutAndDestroyToken(x, y);
 
       this.setupPlayerBoards(players, playerTokenState, tokenTypes);
+      this.setupPlayerScores(players, playerTokenState, tokenTypes);
     },
   });
 });
