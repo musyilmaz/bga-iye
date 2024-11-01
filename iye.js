@@ -69,53 +69,11 @@ define([
             break;
           }
           case CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE: {
-            const { x, y, spendableTokens } = args;
-            for (const token of spendableTokens) {
-              this.addActionButton(
-                `confirm_${token}Spend`,
-                _(`Spend ${this.capitalizeWord(token)} Token`),
-                () => {
-                  this.setClientState(
-                    CLIENT_PLAYER_CONFIRM_MOVE,
-                    this.argsClientPlayerConfirmMove(x, y, token)
-                  );
-                }
-              );
-            }
-            this.addActionButton(
-              "cancel_playerMoveKam",
-              _("Reset Turn"),
-              () => {
-                this.resetTurn();
-              },
-              null,
-              false,
-              "gray"
-            );
+            this.actionButtonsClientPlayerSelectTokenToMove(args);
             break;
           }
           case CLIENT_PLAYER_CONFIRM_MOVE: {
-            this.addActionButton(
-              "confirm_playerMoveKam",
-              _("Confirm Turn"),
-              () => {
-                this.bgaPerformAction("actPlayerMoveKam", {
-                  x: args.x,
-                  y: args.y,
-                  spent_token: args.token,
-                });
-              }
-            );
-            this.addActionButton(
-              "cancel_playerMoveKam",
-              _("Reset Turn"),
-              () => {
-                this.resetTurn();
-              },
-              null,
-              false,
-              "gray"
-            );
+            this.actionButtonsClientPlayerConfirmMove(args);
             break;
           }
         }
@@ -274,6 +232,11 @@ define([
           CLIENT_PLAYER_CONFIRM_MOVE,
           this.argsClientPlayerConfirmMove(x, y, "basic")
         );
+      } else if (spendableTokens.length === 1) {
+        this.setClientState(
+          CLIENT_PLAYER_CONFIRM_MOVE,
+          this.argsClientPlayerConfirmMove(x, y, spendableTokens[0])
+        );
       } else {
         this.setClientState(CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE, {
           descriptionmyturn: _("${you} must select a token to spend"),
@@ -347,6 +310,47 @@ define([
           targetToken: this.actionTokenElement(targetToken),
         },
       };
+    },
+    actionButtonsClientPlayerSelectTokenToMove: function (args) {
+      const { x, y, spendableTokens } = args;
+
+      for (const token of spendableTokens) {
+        this.addActionButton(
+          `confirm_spend_${token}`,
+          _(`${this.actionTokenElement(token)}`),
+          () =>
+            this.setClientState(
+              CLIENT_PLAYER_CONFIRM_MOVE,
+              this.argsClientPlayerConfirmMove(x, y, token)
+            )
+        );
+      }
+
+      this.addActionButton(
+        "cancel_player_move_kam",
+        _("Reset Turn"),
+        this.resetTurn,
+        null,
+        false,
+        "gray"
+      );
+    },
+    actionButtonsClientPlayerConfirmMove: function (args) {
+      this.addActionButton("confirm_player_turn", _("Confirm Turn"), () =>
+        this.bgaPerformAction("actPlayerMoveKam", {
+          x: args.x,
+          y: args.y,
+          spent_token: args.token,
+        })
+      );
+      this.addActionButton(
+        "cancel_player_move_kam",
+        _("Reset Turn"),
+        this.resetTurn,
+        null,
+        false,
+        "gray"
+      );
     },
     setupNotifications: function () {
       const notifications = [["playerTurn", 1000]];
