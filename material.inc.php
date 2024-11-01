@@ -19,6 +19,8 @@
  * are available everywhere in your game logic code.
  *
  */
+$this->game_length = 24;
+
 $this->board = [
   "row" => [
     "size" => 5

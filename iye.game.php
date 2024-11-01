@@ -50,8 +50,8 @@ class iye extends Table
 
     public function getGameProgression()
     {
-        // TODO Calculate game progression 
-        return 0;
+        $board_state = $this->getBoardStateFromDB();
+        return ($this->game_length - count($board_state)) * 100 / count($board_state);
     }
 
     /**
