@@ -166,10 +166,13 @@ define([
       });
 
       for (const coordinate of possibleCoordinates) {
-        const { x, y } = coordinate;
+        const { x, y, movement } = coordinate;
         const targetSquare = document.getElementById(`square_${x}_${y}`);
 
         targetSquare.classList.add("possible_coordinate");
+        if (!movement.includes("basic")) {
+          targetSquare.classList.add("non_basic_possible_coordinate");
+        }
         targetSquare.addEventListener("click", (e) =>
           this.onMoveKamToCoordinate(e, coordinate)
         );
@@ -346,6 +349,11 @@ define([
           .querySelectorAll(".selected_possible_coordinate")
           .forEach((div) => {
             div.classList.remove("selected_possible_coordinate");
+          });
+        document
+          .querySelectorAll(".non_basic_possible_coordinate")
+          .forEach((div) => {
+            div.classList.remove("non_basic_possible_coordinate");
           });
       }
 
