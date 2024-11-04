@@ -97,12 +97,13 @@ class iye extends Table
         $this->setGameStateInitialValue("my_first_global_variable", 0);
 
         // Init game statistics.
-        //
-        // NOTE: statistics used in this file must be defined in your `stats.inc.php` file.
+        $this->initStat("player", "basicMovement", 0);
+        $this->initStat("player", "sunMovement", 0);
+        $this->initStat("player", "horseMovement", 0);
+        $this->initStat("player", "treeMovement", 0);
+        $this->initStat("player", "waterMovement", 0);
+        $this->initStat("player", "owlMovement", 0);
 
-        // Dummy content.
-        // $this->initStat("table", "table_teststat1", 0);
-        // $this->initStat("player", "player_teststat1", 0);
         $sql_values = $this->setupInitialTokens();
 
         $sql = "INSERT INTO token (type, location, x, y) VALUES ";
@@ -147,45 +148,6 @@ class iye extends Table
         $result["playerTokenState"] = $this->getPlayerTokenStateFromDB();
 
         return $result;
-    }
-
-    /**
-     * Game State :: STATE_PLAYER_MOVE_KAM
-     *
-     * Returns possible coordinates for active player to client side
-     */
-    public function argPlayerMoveKam(): array
-    {
-        return [
-            "possibleCoordinates" => $this->getPossibleKamMovements(intval($this->getActivePlayerId()))
-        ];
-    }
-
-    /**
-     * Game State :: STATE_NEXT_PLAYER
-     * This is an automated game state
-     *
-     * Switches activePlayer & checks for endgame condition
-     */
-    public function stNextPlayer(): void
-    {
-        // Retrieve the active player ID.
-        $player_id = (int)$this->getActivePlayerId();
-
-        // Give some extra time to the active player when he completed an action
-        $this->giveExtraTime($player_id);
-
-        $this->activeNextPlayer();
-
-        // TODO GAME END Condition
-        $possibleKamMovements = $this->getPossibleKamMovements(intval($this->getActivePlayerId()));
-        if (empty($possibleKamMovements)) {
-            var_dump("GAME IS FINISHED");
-        }
-
-        // Go to another gamestate
-        // Here, we would detect if the game is over, and in this case use "endGame" transition instead 
-        $this->gamestate->nextState("nextTurn");
     }
 
     /**
@@ -234,8 +196,51 @@ class iye extends Table
             )
         );
 
+        $this->incStat(1, $this->getMovementStatName($spent_token), $player_id);
+
         $this->gamestate->nextState("nextPlayer");
     }
+
+    /**
+     * Game State :: STATE_PLAYER_MOVE_KAM
+     *
+     * Returns possible coordinates for active player to client side
+     */
+    public function argPlayerMoveKam(): array
+    {
+        return [
+            "possibleCoordinates" => $this->getPossibleKamMovements(intval($this->getActivePlayerId()))
+        ];
+    }
+
+    /**
+     * Game State :: STATE_NEXT_PLAYER
+     * This is an automated game state
+     *
+     * Switches activePlayer & checks for endgame condition
+     */
+    public function stNextPlayer(): void
+    {
+        // Retrieve the active player ID.
+        $player_id = (int)$this->getActivePlayerId();
+
+        // Give some extra time to the active player when he completed an action
+        $this->giveExtraTime($player_id);
+
+        $this->activeNextPlayer();
+
+        // TODO GAME END Condition
+        $possibleKamMovements = $this->getPossibleKamMovements(intval($this->getActivePlayerId()));
+        if (empty($possibleKamMovements)) {
+            var_dump("GAME IS FINISHED");
+        }
+
+        // Go to another gamestate
+        // Here, we would detect if the game is over, and in this case use "endGame" transition instead 
+        $this->gamestate->nextState("nextTurn");
+    }
+
+
 
     /**
      * Migrate database.
@@ -711,6 +716,11 @@ class iye extends Table
 
 
         return $player_scores;
+    }
+
+    protected function getMovementStatName($spent_token)
+    {
+        return "{$spent_token}Movement";
     }
 
     /**

@@ -1,1 +1,34 @@
-{}
+{
+  "player": {
+    "basicMovement": {
+      "id": 10,
+      "name": "Natural kam movement",
+      "type": "int"
+    },
+    "sunMovement": {
+      "id": 11,
+      "name": "Kam movement with SUN iye",
+      "type": "int"
+    },
+    "horseMovement": {
+      "id": 12,
+      "name": "Kam movement with HORSE iye",
+      "type": "int"
+    },
+    "treeMovement": {
+      "id": 13,
+      "name": "Kam movement with TREE iye",
+      "type": "int"
+    },
+    "waterMovement": {
+      "id": 14,
+      "name": "Kam movement with WATER iye",
+      "type": "int"
+    },
+    "owlMovement": {
+      "id": 15,
+      "name": "Kam movement with OWL iye",
+      "type": "int"
+    }
+  }
+}
