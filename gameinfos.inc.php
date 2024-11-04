@@ -11,7 +11,7 @@
 
 $gameinfos = [
     // Name of the game in English (will serve as the basis for translation)
-    'game_name' => "IYE",
+    'game_name' => "iye",
 
     // Game publisher (use empty string if there is no publisher)
     'publisher' => 'Neotroy Games',
@@ -23,7 +23,7 @@ $gameinfos = [
     'publisher_bgg_id' => 1234,
 
     // Board game geek ID of the game
-    'bgg_id' => 28143,
+    'bgg_id' => 340575,
 
     // Players configuration that can be played (ex: 2 to 4 players)
     'players' => [2],
