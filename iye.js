@@ -314,7 +314,11 @@ define([
       );
     },
     setupNotifications: function () {
-      const notifications = [["playerTurn", 1000]];
+      const notifications = [
+        ["playerTurn", 1000],
+        ["gameEndWithNoPossibleMovement", 1000],
+        ["gameEndWithScoring", 1000],
+      ];
 
       notifications.forEach((notification) => {
         const [name, timeout] = notification;
@@ -344,6 +348,12 @@ define([
 
       this.setupPlayerBoards(players, playerTokenState, tokenTypes);
       this.updatePlayerScores(playerScores);
+    },
+    notif_gameEndWithNoPossibleMovement: function (notification) {
+      console.log("Game end with no possible movement", notification);
+    },
+    notif_gameEndWithScoring: function (notification) {
+      console.log("Game end with scoring", notification);
     },
   });
 });

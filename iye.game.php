@@ -17,6 +17,7 @@ require_once(APP_GAMEMODULE_PATH . "module/table/table.game.php");
 define("STATE_GAME_SETUP", 1);
 define("STATE_PLAYER_MOVE_KAM", 10);
 define("STATE_NEXT_PLAYER", 20);
+define("STATE_PREPARE_GAME_END", 98);
 define("STATE_GAME_END", 99);
 
 class iye extends Table
@@ -50,7 +51,7 @@ class iye extends Table
 
     public function getGameProgression()
     {
-        $board_state = $this->getBoardStateFromDB();
+        $board_state = $this->getTokenBoardStateFromDB();
         return ($this->game_length - count($board_state)) * 100 / $this->game_length;
     }
 
@@ -229,16 +230,79 @@ class iye extends Table
 
         $this->activeNextPlayer();
 
-        // TODO GAME END Condition
-        $possibleKamMovements = $this->getPossibleKamMovements(intval($this->getActivePlayerId()));
-        if (empty($possibleKamMovements)) {
-            var_dump("GAME IS FINISHED");
+        $possible_kam_movements = $this->getPossibleKamMovements(intval($this->getActivePlayerId()));
+        $token_board_state = $this->getTokenBoardStateFromDB();
+
+        if (empty($possible_kam_movements) || count($token_board_state) === 1) {
+            $this->gamestate->nextState("prepareGameEnd");
         }
 
-        // Go to another gamestate
-        // Here, we would detect if the game is over, and in this case use "endGame" transition instead 
         $this->gamestate->nextState("nextTurn");
     }
+
+    public function stPrepareGameEnd(): void
+    {
+        $active_player_id = $this->getActivePlayerId();
+        $players = $this->loadPlayersBasicInfos();
+
+        $possible_kam_movements = $this->getPossibleKamMovements(intval($active_player_id));
+        $token_board_state = $this->getTokenBoardStateFromDB();
+
+        if (empty($possible_kam_movements)) {
+            foreach (array_keys($players) as $player_id) {
+                if ($player_id === $active_player_id) {
+                    $this->setPlayerScoresToDB($player_id, 0);
+                } else {
+                    $this->setPlayerScoresToDB($player_id, 1);
+                }
+            }
+
+            $this->notifyAllPlayers(
+                "gameEndWithNoPossibleMovement",
+                clienttranslate('Game ended with running out of possible movements, ${winnerName} won the game!'),
+                array(
+                    'loserName' => $this->getActivePlayerName(),
+                    'winnerName' => $this->getPlayerNameById($this->getOpponentId($active_player_id))
+                )
+            );
+
+            $this->setStat(0, "howGameEnded");
+            $this->gamestate->nextState('gameEnd');
+        }
+
+        if (count($token_board_state) === 1) {
+            $opponent_id = $this->getOpponentId($active_player_id);
+            $active_player_score = $this->getPlayerScoreFromDB($active_player_id);
+            $opponent_score = $this->getPlayerScoreFromDB($opponent_id);
+
+            $winner = $active_player_score > $opponent_score ? "active" : "opponent";
+
+            $this->notifyAllPlayers(
+                "gameEndWithScoring",
+                clienttranslate('Game ended. ${winnerName} has ${winnerScore} points while ${loserName} has ${loserScore} points. ${winnerName} won the game!'),
+                $winner === "active" ?
+                    array(
+                        'loserId' => $opponent_id,
+                        'opponentId' => $active_player_id,
+                        'loserName' => $this->getPlayerNameById($opponent_id),
+                        'winnerName' => $this->getActivePlayerName(),
+                        'winnerScore' => $active_player_score,
+                        'loserScore' => $opponent_score
+                    ) : array(
+                        'loserId' => $active_player_id,
+                        'opponentId' => $opponent_id,
+                        'loserName' => $this->getActivePlayerName(),
+                        'winnerName' => $this->getPlayerNameById($opponent_id),
+                        'winnerScore' => $opponent_score,
+                        'loserScore' => $active_player_score
+                    )
+            );
+
+            $this->setStat(1, "howGameEnded");
+            $this->gamestate->nextState('gameEnd');
+        }
+    }
+
 
 
 
@@ -377,6 +441,12 @@ class iye extends Table
     {
         $board_state_sql = "SELECT * FROM token where location='board'";
         return self::getObjectListFromDB($board_state_sql);
+    }
+
+    protected function getTokenBoardStateFromDB()
+    {
+        $token_board_state_sql = "SELECT * FROM token WHERE location='board' AND NOT type='kam'";
+        return self::getObjectListFromDB($token_board_state_sql);
     }
 
     /** 
@@ -681,6 +751,12 @@ class iye extends Table
     {
         $sql = "UPDATE player SET player_score=$score WHERE player_id='$player_id'";
         $this->DbQuery($sql);
+    }
+
+    protected function getPlayerScoreFromDB($player_id)
+    {
+        $sql = "SELECT player_score FROM player WHERE player_id='$player_id'";
+        return $this->getUniqueValueFromDB($sql);
     }
 
     protected function calculatePlayerScores()

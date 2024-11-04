@@ -1,4 +1,11 @@
 {
+  "table": {
+    "howGameEnded": {
+      "id": 20,
+      "name": "How did the game end?",
+      "type": "int"
+    }
+  },
   "player": {
     "basicMovement": {
       "id": 10,
@@ -7,28 +14,34 @@
     },
     "sunMovement": {
       "id": 11,
-      "name": "Kam movement with SUN iye",
+      "name": "Kam movement with sun iye",
       "type": "int"
     },
     "horseMovement": {
       "id": 12,
-      "name": "Kam movement with HORSE iye",
+      "name": "Kam movement with horse iye",
       "type": "int"
     },
     "treeMovement": {
       "id": 13,
-      "name": "Kam movement with TREE iye",
+      "name": "Kam movement with tree iye",
       "type": "int"
     },
     "waterMovement": {
       "id": 14,
-      "name": "Kam movement with WATER iye",
+      "name": "Kam movement with water iye",
       "type": "int"
     },
     "owlMovement": {
       "id": 15,
-      "name": "Kam movement with OWL iye",
+      "name": "Kam movement with owl iye",
       "type": "int"
     }
+  },
+  "value_labels": {
+    "20": [
+      "Ended with running out of possible movements",
+      "Ended with regular scoring"
+    ]
   }
 }
