@@ -180,6 +180,8 @@ define([
       event.stopPropagation();
 
       this.resetSelectedTargetSquare();
+      const { kamCoordinate: originalKamCoordinate } =
+        this.gamedatas.gamestate.args;
       const { x, y, movement: spendableTokens } = coordinateInfo;
       const targetSquare = document.getElementById(`square_${x}_${y}`);
 
@@ -191,17 +193,22 @@ define([
       if (spendableTokens.includes("basic")) {
         this.setClientState(
           CLIENT_PLAYER_CONFIRM_MOVE,
-          this.argsClientPlayerConfirmMove(x, y, "basic")
+          this.argsClientPlayerConfirmMove(x, y, "basic", originalKamCoordinate)
         );
       } else if (spendableTokens.length === 1) {
         this.setClientState(
           CLIENT_PLAYER_CONFIRM_MOVE,
-          this.argsClientPlayerConfirmMove(x, y, spendableTokens[0])
+          this.argsClientPlayerConfirmMove(
+            x,
+            y,
+            spendableTokens[0],
+            originalKamCoordinate
+          )
         );
       } else {
         this.setClientState(CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE, {
           descriptionmyturn: _("${you} must select a token to spend"),
-          args: { x, y, spendableTokens },
+          args: { x, y, spendableTokens, kamCoordinate: originalKamCoordinate },
         });
       }
     },
@@ -212,10 +219,6 @@ define([
     },
     selectTargetSquare: function (targetSquare) {
       targetSquare.classList.add("selected_possible_coordinate");
-    },
-    getKamTokenState: function () {
-      const { tokenState } = this.gamedatas;
-      return tokenState["board"].find((token) => token.type === "kam");
     },
     moveKamToCoordinate: function (x, y) {
       const targetSquare = document.getElementById(`square_${x}_${y}`);
@@ -231,9 +234,10 @@ define([
       this.fadeOutAndDestroy(targetToken, 500, 0);
     },
     resetTurn: function () {
-      const kamToken = this.getKamTokenState();
+      const { kamCoordinate } = this.gamedatas.gamestate.args;
 
-      if (kamToken) this.moveKamToCoordinate(kamToken.x, kamToken.y);
+      if (kamCoordinate.length)
+        this.moveKamToCoordinate(kamCoordinate[0], kamCoordinate[1]);
       this.resetSelectedTargetSquare();
       this.restoreServerGameState();
     },
@@ -243,7 +247,7 @@ define([
     actionTokenElement: function (token) {
       return `<div class="action-token" data-token-type="${token}"></div>`;
     },
-    argsClientPlayerConfirmMove: function (x, y, token) {
+    argsClientPlayerConfirmMove: function (x, y, token, originalKamCoordinate) {
       const targetToken = document.getElementById(`token_${x}_${y}`).dataset
         .tokenType;
 
@@ -255,6 +259,7 @@ define([
             y,
             token,
             targetToken: this.actionTokenElement(targetToken),
+            kamCoordinate: originalKamCoordinate,
           },
         };
       }
@@ -269,11 +274,12 @@ define([
           token,
           spentToken: this.actionTokenElement(token),
           targetToken: this.actionTokenElement(targetToken),
+          kamCoordinate: originalKamCoordinate,
         },
       };
     },
     actionButtonsClientPlayerSelectTokenToMove: function (args) {
-      const { x, y, spendableTokens } = args;
+      const { x, y, spendableTokens, kamCoordinate } = args;
 
       for (const token of spendableTokens) {
         this.addActionButton(
@@ -282,7 +288,7 @@ define([
           () =>
             this.setClientState(
               CLIENT_PLAYER_CONFIRM_MOVE,
-              this.argsClientPlayerConfirmMove(x, y, token)
+              this.argsClientPlayerConfirmMove(x, y, token, kamCoordinate)
             )
         );
       }

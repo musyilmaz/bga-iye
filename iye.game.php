@@ -210,7 +210,8 @@ class iye extends Table
     public function argPlayerMoveKam(): array
     {
         return [
-            "possibleCoordinates" => $this->getPossibleKamMovements(intval($this->getActivePlayerId()))
+            "possibleCoordinates" => $this->getPossibleKamMovements(intval($this->getActivePlayerId())),
+            "kamCoordinate" => $this->getKamCoordinate(),
         ];
     }
 
@@ -366,6 +367,11 @@ class iye extends Table
         $sql_values[] = "('$kam_type', 'board', $kam_start_x, $kam_start_y)";
 
         return $sql_values;
+    }
+
+    protected function getKamCoordinate()
+    {
+        return $this->getKamPositionFromDB();
     }
 
     /**
