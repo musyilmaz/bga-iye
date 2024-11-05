@@ -287,7 +287,7 @@ define([
       for (const token of spendableTokens) {
         this.addActionButton(
           `confirm_spend_${token}`,
-          _(`${this.actionTokenElement(token)}`),
+          `${this.actionTokenElement(token)}`,
           () =>
             this.setClientState(
               CLIENT_PLAYER_CONFIRM_MOVE,

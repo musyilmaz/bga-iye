@@ -3,16 +3,11 @@
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * iye implementation : © <Your name here> <Your email address here>
+ * iye implementation : © Mustafa Yilmaz musyilmaz.dev@gmail.com
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
- *
- * states.inc.php
- *
- * iye game states description
- *
  */
 
 $machinestates = [
