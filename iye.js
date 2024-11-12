@@ -131,6 +131,8 @@ define([
         tokens[token.type] = {
           present: tokensForType.length > 0,
           amount: tokensForType.length,
+          totalAmount: token.amount,
+          points: token.points,
         };
       });
 

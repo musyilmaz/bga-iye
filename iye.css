@@ -117,15 +117,74 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 10px;
 }
 
-.player_panel_game_information > .token_breakdown > .player_board_token {
-  position: relative;
+.player_panel_game_information > .token_breakdown > .game_information_token {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.game_information_token > .info_token {
   width: 40px;
   height: 40px;
   background-image: url("img/tokens.jpg");
   background-size: auto 100%;
+}
+
+.game_information_token > .info_token[data-present="true"] {
+  opacity: 1;
+}
+
+.game_information_token > .info_token[data-present="false"] {
+  opacity: 0.2;
+}
+
+.game_information_token > .info_token[data-token-type="owl"] {
+  background-position-x: 0px;
+}
+
+.game_information_token > .info_token[data-token-type="water"] {
+  background-position-x: -40px;
+}
+
+.game_information_token > .info_token[data-token-type="tree"] {
+  background-position-x: -80px;
+}
+
+.game_information_token > .info_token[data-token-type="horse"] {
+  background-position-x: -120px;
+}
+
+.game_information_token > .info_token[data-token-type="sun"] {
+  background-position-x: -160px;
+}
+
+.game_information_token > .amount {
+  width: 40px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: black;
+}
+
+.game_information_token > .points {
+  width: 40px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid gray;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  color: gray;
 }
 
 /**
@@ -339,7 +398,7 @@
   display: flex;
   gap: 10px;
   z-index: 949;
-  align-items: flex-end; // so help doesn't move up when the other expands
+  align-items: flex-end;
 }
 
 .bga-help_button {

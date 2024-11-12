@@ -35,20 +35,30 @@
       <span class="title">Remaining IYEs</span>\
       <span class="description">Total: ${total}</span>\
       <div class="token_breakdown">\
-        <div class="player_board_token" data-token-type="sun" data-present="${sun.present}">\
-          <span class="amount" data-present="${sun.present}">${sun.amount}</span>\
+        <div class="game_information_token">\
+          <div class="info_token" data-token-type="sun" data-present="${sun.present}"></div>\
+          <span class="amount">${sun.amount} / ${sun.totalAmount}</span>\
+          <span class="points">${sun.points} pts</span>\
         </div>\
-        <div class="player_board_token" data-token-type="horse" data-present="${horse.present}">\
-          <span class="amount" data-present="${horse.present}">${horse.amount}</span>\
+        <div class="game_information_token">\
+          <div class="info_token" data-token-type="horse" data-present="${horse.present}"></div>\
+          <span class="amount">${horse.amount} / ${horse.totalAmount}</span>\
+          <span class="points">${horse.points} pts</span>\
         </div>\
-        <div class="player_board_token" data-token-type="tree" data-present="${tree.present}">\
-          <span class="amount" data-present="${tree.present}">${tree.amount}</span>\
+        <div class="game_information_token">\
+          <div class="info_token" data-token-type="tree" data-present="${tree.present}"></div>\
+          <span class="amount">${tree.amount} / ${tree.totalAmount}</span>\
+          <span class="points">${tree.points} pts</span>\
         </div>\
-        <div class="player_board_token" data-token-type="water" data-present="${water.present}">\
-          <span class="amount" data-present="${water.present}">${water.amount}</span>\
+        <div class="game_information_token">\
+          <div class="info_token" data-token-type="water" data-present="${water.present}"></div>\
+          <span class="amount">${water.amount} / ${water.totalAmount}</span>\
+          <span class="points">${water.points} pts</span>\
         </div>\
-        <div class="player_board_token" data-token-type="owl" data-present="${owl.present}">\
-          <span class="amount" data-present="${owl.present}">${owl.amount}</span>\
+        <div class="game_information_token">\
+          <div class="info_token" data-token-type="owl" data-present="${owl.present}"></div>\
+          <span class="amount">${owl.amount} / ${owl.totalAmount}</span>\
+          <span class="points">${owl.points} pt</span>\
         </div>\
       </div>\
     </div>\
