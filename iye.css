@@ -13,6 +13,8 @@
  *
  */
 
+@import url(modules/bga-help.css);
+
 /**
  *-------------------
  * Player Panel Boards
@@ -86,6 +88,46 @@
 
 .player_board_token > .amount[data-present="false"] {
   opacity: 0;
+}
+
+/**
+ *-------------------
+ * Game Information (Below Player Panels)
+ *-------------------
+ */
+.player_panel_game_information {
+  margin-top: 5px;
+  background-color: #ebd5bd;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player_panel_game_information > .title {
+  font-weight: 700;
+}
+
+.player_panel_game_information > .description {
+  font-weight: 400;
+}
+
+.player_panel_game_information > .token_breakdown {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 10px;
+}
+
+.player_panel_game_information > .token_breakdown > .player_board_token {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background-image: url("img/tokens.jpg");
+  background-size: auto 100%;
 }
 
 /**

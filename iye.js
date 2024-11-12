@@ -11,25 +11,53 @@
 const PLAYER_MOVE_KAM = "playerMoveKam";
 const CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE = "client_playerSelectTokenToMove";
 const CLIENT_PLAYER_CONFIRM_MOVE = "client_playerConfirmMove";
+const BGA_HELP_FOLDED_HELP = "BgaHelp_IyeFoldedHelp";
 
 define([
   "dojo",
   "dojo/_base/declare",
   "ebg/core/gamegui",
   "ebg/counter",
+  g_gamethemeurl + "modules/bga-help.js",
 ], function (dojo, declare) {
   return declare("bgagame.iye", ebg.core.gamegui, {
     constructor: function () {
       console.log("iye constructor");
+
+      this.helpManager = new HelpManager(this.game, {
+        buttons: [
+          new BgaHelpPopinButton({
+            title: _("Card help"),
+            html: `
+                <h1>Main section</h1>
+                <div>The HTML content of the popin</div>
+            `,
+          }),
+          new BgaHelpExpandableButton({
+            unfoldedHtml: `The expanded content of the button`,
+            foldedContentExtraClasses: "color-help-folded-content",
+            unfoldedContentExtraClasses: "color-help-unfolded-content",
+            expandedWidth: "200px",
+            expandedHeight: "400px",
+            defaultFolded: false,
+            localStorageFoldedKey: BGA_HELP_FOLDED_HELP,
+          }),
+        ],
+      });
     },
     setup: function (gamedatas) {
       const {
         players,
         playerTokenState,
+        tokenState,
         materialInfo: { tokenTypes },
       } = gamedatas;
 
       this.setupPlayerBoards(players, playerTokenState, tokenTypes);
+      this.setupGameInformationPanel(
+        tokenState.board.filter((t) => t.type !== "kam"),
+        tokenTypes
+      );
       this.setupGameBoard(gamedatas.materialInfo.board);
       this.setupTokens(gamedatas);
 
@@ -105,6 +133,26 @@ define([
           }
         );
       }
+    },
+    setupGameInformationPanel: function (boardState, tokenTypes) {
+      const tokens = {};
+      Object.values(tokenTypes).map((token) => {
+        const tokensForType = boardState.filter((bs) => bs.type === token.type);
+
+        tokens[token.type] = {
+          present: tokensForType.length > 0,
+          amount: tokensForType.length,
+        };
+      });
+
+      const gameInformationPanelElement = document.getElementById(
+        "player_panel_game_information"
+      );
+
+      gameInformationPanelElement.innerHTML = this.format_block(
+        "jstpl_game_information",
+        { total: boardState.length, ...tokens }
+      );
     },
     updatePlayerScores: function (playerScores) {
       Object.keys(playerScores).map((playerId) => {
@@ -336,8 +384,15 @@ define([
       });
     },
     notif_playerTurn: function (notification) {
-      const { x, y, playerTokenState, tokenTypes, players, playerScores } =
-        notification.args;
+      const {
+        x,
+        y,
+        playerTokenState,
+        tokenState,
+        tokenTypes,
+        players,
+        playerScores,
+      } = notification.args;
 
       // Remove possible moves from previous state
       if (this.isCurrentPlayerActive) {
@@ -361,6 +416,10 @@ define([
       this.fadeOutAndDestroyToken(x, y);
 
       this.setupPlayerBoards(players, playerTokenState, tokenTypes);
+      this.setupGameInformationPanel(
+        tokenState.board.filter((t) => t.type !== "kam"),
+        tokenTypes
+      );
       this.updatePlayerScores(playerScores);
     },
     notif_gameEndWithNoPossibleMovement: function (notification) {
@@ -368,6 +427,12 @@ define([
     },
     notif_gameEndWithScoring: function (notification) {
       console.log("Game end with scoring", notification);
+    },
+
+    /* @Override */
+    updatePlayerOrdering() {
+      this.inherited(arguments);
+      dojo.place("player_panel_game_information", "player_boards", "after");
     },
   });
 });

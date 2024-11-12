@@ -192,6 +192,7 @@ class iye extends Table
                 'tokenState' => $tokenState,
                 'tokenTypes' => $this->token_types,
                 'players' => $this->loadPlayersBasicInfos(),
+                'tokenState' => $this->groupBy($this->getTokenStateFromDB(), "location"),
                 'playerTokenState' => $this->getPlayerTokenStateFromDB(),
                 'playerScores' => $player_scores
             )

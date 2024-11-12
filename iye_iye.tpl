@@ -6,6 +6,8 @@
   </div>
 </div>
 
+<div id="player_panel_game_information"></div>
+
 <script type="text/javascript">
 
   var jstpl_player_board = '\
@@ -24,6 +26,30 @@
       </div>\
       <div class="player_board_token" data-token-type="owl" data-present="${owl.present}">\
         <span class="amount" data-present="${owl.present}">${owl.amount}</span>\
+      </div>\
+    </div>\
+  ';
+
+  var jstpl_game_information = '\
+    <div class="player_panel_game_information">\
+      <span class="title">Remaining Tokens</span>\
+      <span class="description">Total: ${total}</span>\
+      <div class="token_breakdown">\
+        <div class="player_board_token" data-token-type="sun" data-present="${sun.present}">\
+          <span class="amount" data-present="${sun.present}">${sun.amount}</span>\
+        </div>\
+        <div class="player_board_token" data-token-type="horse" data-present="${horse.present}">\
+          <span class="amount" data-present="${horse.present}">${horse.amount}</span>\
+        </div>\
+        <div class="player_board_token" data-token-type="tree" data-present="${tree.present}">\
+          <span class="amount" data-present="${tree.present}">${tree.amount}</span>\
+        </div>\
+        <div class="player_board_token" data-token-type="water" data-present="${water.present}">\
+          <span class="amount" data-present="${water.present}">${water.amount}</span>\
+        </div>\
+        <div class="player_board_token" data-token-type="owl" data-present="${owl.present}">\
+          <span class="amount" data-present="${owl.present}">${owl.amount}</span>\
+        </div>\
       </div>\
     </div>\
   ';
