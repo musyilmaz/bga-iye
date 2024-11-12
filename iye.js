@@ -142,7 +142,16 @@ define([
 
       gameInformationPanelElement.innerHTML = this.format_block(
         "jstpl_game_information",
-        { total: boardState.length, ...tokens }
+        {
+          title: _("IYE informations"),
+          description: dojo.string.substitute(
+            _("${remaining} iye is present on board"),
+            {
+              remaining: boardState.length,
+            }
+          ),
+          ...tokens,
+        }
       );
     },
     updatePlayerScores: function (playerScores) {

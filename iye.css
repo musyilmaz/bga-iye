@@ -94,7 +94,7 @@
  *-------------------
  */
 .player_panel_game_information {
-  margin-top: 5px;
+  margin: 5px auto;
   background-color: #ebd5bd;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
   border-radius: 8px;
