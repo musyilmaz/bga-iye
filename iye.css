@@ -241,3 +241,95 @@
 .action-token[data-token-type="sun"] {
   background-position-x: -160px;
 }
+
+/**
+ *-------------------
+ * Game Help
+ *-------------------
+ */
+
+.game-help-wrapper {
+  max-height: 500px;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.game-help-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 20px;
+}
+
+.game-help-section::after {
+  content: "";
+  width: 50px;
+  height: 2px;
+  margin: 10px auto;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.game-help-section:last-child::after {
+  display: none;
+}
+
+.game-help-section > .title {
+  color: red;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.game-help-section > .description {
+  text-align: justify;
+  line-height: 1.6;
+}
+
+.token-distribution-table {
+  border-collapse: collapse;
+  text-indent: initial;
+}
+
+.token-distribution-table th,
+.token-distribution-table td {
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  padding: 8px;
+  text-align: center;
+}
+
+.token-distribution-table th:first-child {
+  border-top: none;
+  border-left: none;
+}
+
+.token-distribution-table .help-token {
+  width: 40px;
+  height: 40px;
+  background-image: url("img/tokens.jpg");
+  background-size: auto 100%;
+}
+
+.help-token[data-token-type="owl"] {
+  background-position-x: 0px;
+}
+
+.help-token[data-token-type="water"] {
+  background-position-x: -40px;
+}
+
+.help-token[data-token-type="tree"] {
+  background-position-x: -80px;
+}
+
+.help-token[data-token-type="horse"] {
+  background-position-x: -120px;
+}
+
+.help-token[data-token-type="sun"] {
+  background-position-x: -160px;
+}
+
+.token-distribution-table .row-title {
+  font-weight: 700;
+}

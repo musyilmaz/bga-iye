@@ -32,7 +32,7 @@
 
   var jstpl_game_information = '\
     <div class="player_panel_game_information">\
-      <span class="title">Remaining Tokens</span>\
+      <span class="title">Remaining IYEs</span>\
       <span class="description">Total: ${total}</span>\
       <div class="token_breakdown">\
         <div class="player_board_token" data-token-type="sun" data-present="${sun.present}">\

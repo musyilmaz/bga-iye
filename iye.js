@@ -23,27 +23,6 @@ define([
   return declare("bgagame.iye", ebg.core.gamegui, {
     constructor: function () {
       console.log("iye constructor");
-
-      this.helpManager = new HelpManager(this.game, {
-        buttons: [
-          new BgaHelpPopinButton({
-            title: _("Card help"),
-            html: `
-                <h1>Main section</h1>
-                <div>The HTML content of the popin</div>
-            `,
-          }),
-          new BgaHelpExpandableButton({
-            unfoldedHtml: `The expanded content of the button`,
-            foldedContentExtraClasses: "color-help-folded-content",
-            unfoldedContentExtraClasses: "color-help-unfolded-content",
-            expandedWidth: "200px",
-            expandedHeight: "400px",
-            defaultFolded: false,
-            localStorageFoldedKey: BGA_HELP_FOLDED_HELP,
-          }),
-        ],
-      });
     },
     setup: function (gamedatas) {
       const {
@@ -52,6 +31,16 @@ define([
         tokenState,
         materialInfo: { tokenTypes },
       } = gamedatas;
+
+      this.helpManager = new HelpManager(this.game, {
+        buttons: [
+          new BgaHelpPopinButton({
+            title: _("Help"),
+            buttonBackground: "red",
+            html: this.iyeHelpContent(),
+          }),
+        ],
+      });
 
       this.setupPlayerBoards(players, playerTokenState, tokenTypes);
       this.setupGameInformationPanel(
@@ -433,6 +422,108 @@ define([
     updatePlayerOrdering() {
       this.inherited(arguments);
       dojo.place("player_panel_game_information", "player_boards", "after");
+    },
+    iyeHelpContent: function () {
+      return `
+        <div class="game-help-wrapper">
+            ${this.gameObjectiveHelpSection()}
+            ${this.turnStructureHelpSection()}
+            ${this.endGameScoringHelpSection()}
+            ${this.naturalMovementHelpSection()}
+            ${this.iyeMovementHelpSection()}
+        </div>
+      `;
+    },
+    gameObjectiveHelpSection: function () {
+      const gameObjectiveDescription = _(
+        "IYE is played between 2 players with alternating turns. The game continues until either one player has no valid moves or both players have taken 12 turns, which means a single IYE token is left on the board. If the game ends with a player having no valid moves, that player loses immediately. If the game ends after both players have taken 12 turns, an endgame scoring determines the winner of the game."
+      );
+
+      return `
+        <div class="game-help-section">
+          <span class="title">${_("Game Objective")}</span>
+          <span class="description">${gameObjectiveDescription}</span>
+        </div>
+      `;
+    },
+    turnStructureHelpSection: function () {
+      const turnStructureDescription = _(
+        "Every turn, the active player moves KAM to a new position by either using natural movement or spending IYE from their supply. After moving KAM to a position, the active player gifts IYE on that position to their opponent, who may utilize it in future turns."
+      );
+
+      return `
+        <div class="game-help-section">
+          <span class="title">${_("Turn Structure")}</span>
+          <span class="description">${turnStructureDescription}</span>
+        </div>
+      `;
+    },
+    endGameScoringHelpSection: function () {
+      const endGameWithNoValidMovementDescription = _(
+        "If the end of the game is triggered because there are no possible KAM movement positions, the active player instantly loses the game."
+      );
+
+      const endGameWithNormalDescription = _(
+        "If the end of the game is triggered with only one IYE token left on the board, both players calculate their scores based on the remaining IYE tokens in their supplies. If a player has a majority of IYE tokens, they will receive points based on the chart below. In case of a tie, neither player scores. The player with the highest score wins the game."
+      );
+
+      return `
+        <div class="game-help-section">
+          <span class="title">${_("End of the Game")}</span>
+          <span class="description">${endGameWithNoValidMovementDescription}</span>
+          <span class="description">${endGameWithNormalDescription}</span>
+          ${this.tokenDistributionTable()}
+        </div>
+      `;
+    },
+    tokenDistributionTable: function () {
+      return `
+        <table class="token-distribution-table">
+          <tr>
+            <th class="row-title"></th>
+            <th><div class="help-token" data-token-type="sun"></div></th>
+            <th><div class="help-token" data-token-type="horse"></div></th>
+            <th><div class="help-token" data-token-type="tree"></div></th>
+            <th><div class="help-token" data-token-type="water"></div></th>
+            <th><div class="help-token" data-token-type="owl"></div></th>
+          </tr>
+          <tr>
+            <td class="row-title">Token Amount</td>
+            <td>9</td>
+            <td>7</td>
+            <td>5</td>
+            <td>3</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td class="row-title">Points on Majority</td>
+            <td>9</td>
+            <td>7</td>
+            <td>5</td>
+            <td>3</td>
+            <td>1</td>
+          </tr>
+        </table>
+      `;
+    },
+    naturalMovementHelpSection: function () {
+      const naturalMovementDescription = _(
+        "On the active player's turn, they can always move the KAM token 1 or 2 spaces orthogonally. This movement is always available and preferred when there is a valid target. There is no cost for this type of movement."
+      );
+      return `
+        <div class="game-help-section">
+          <span class="title">${_("Natural KAM Movement")}</span>
+          <span class="description">${naturalMovementDescription}</span>
+        </div>
+      `;
+    },
+    iyeMovementHelpSection: function () {
+      return `
+        <div class="game-help-section">
+          <span class="title">${_("IYE Based KAM Movement")}</span>
+          <span class="description">This section is TODO</span>
+        </div>
+      `;
     },
   });
 });
