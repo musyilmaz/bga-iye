@@ -15,9 +15,10 @@ declare(strict_types=1);
 require_once(APP_GAMEMODULE_PATH . "module/table/table.game.php");
 
 define("STATE_GAME_SETUP", 1);
+define("STATE_PREPARE_NEW_ROUND", 2);
 define("STATE_PLAYER_MOVE_KAM", 10);
 define("STATE_NEXT_PLAYER", 20);
-define("STATE_PREPARE_GAME_END", 98);
+define("STATE_PREPARE_ROUND_END", 98);
 define("STATE_GAME_END", 99);
 
 class iye extends Table
@@ -36,12 +37,7 @@ class iye extends Table
     {
         parent::__construct();
 
-        $this->initGameStateLabels([
-            "my_first_global_variable" => 10,
-            "my_second_global_variable" => 11,
-            "my_first_game_variant" => 100,
-            "my_second_game_variant" => 101,
-        ]);
+        $this->initGameStateLabels([]);
     }
 
     protected function getGameName()
@@ -94,9 +90,6 @@ class iye extends Table
 
         // Init global values with their initial values.
 
-        // Dummy content.
-        $this->setGameStateInitialValue("my_first_global_variable", 0);
-
         // Init game statistics.
         $this->initStat("player", "basicMovement", 0);
         $this->initStat("player", "sunMovement", 0);
@@ -104,12 +97,6 @@ class iye extends Table
         $this->initStat("player", "treeMovement", 0);
         $this->initStat("player", "waterMovement", 0);
         $this->initStat("player", "owlMovement", 0);
-
-        $sql_values = $this->setupInitialTokens();
-
-        $sql = "INSERT INTO token (type, location, x, y) VALUES ";
-        $sql .= implode(",", $sql_values);
-        $this->DbQuery($sql);
 
         // Activate first player once everything has been initialized and ready.
         $this->activeNextPlayer();
@@ -216,6 +203,18 @@ class iye extends Table
         ];
     }
 
+    public function stPrepareNewRound(): void
+    {
+
+        $this->setupNewGameRound();
+
+        $this->notifyAllPlayers("newRound", clienttranslate("A new round is beginning."), array(
+            "test" => "test"
+        ));
+
+        $this->gamestate->nextState("movePlayerTurns");
+    }
+
     /**
      * Game State :: STATE_NEXT_PLAYER
      * This is an automated game state
@@ -236,73 +235,18 @@ class iye extends Table
         $token_board_state = $this->getTokenBoardStateFromDB();
 
         if (empty($possible_kam_movements) || count($token_board_state) === 1) {
-            $this->gamestate->nextState("prepareGameEnd");
+            $this->gamestate->nextState("prepareRoundEnd");
+        } else {
+            $this->gamestate->nextState("nextTurn");
         }
-
-        $this->gamestate->nextState("nextTurn");
     }
 
-    public function stPrepareGameEnd(): void
+    public function stPrepareRoundEnd(): void
     {
-        $active_player_id = $this->getActivePlayerId();
-        $players = $this->loadPlayersBasicInfos();
-
-        $possible_kam_movements = $this->getPossibleKamMovements(intval($active_player_id));
-        $token_board_state = $this->getTokenBoardStateFromDB();
-
-        if (empty($possible_kam_movements)) {
-            foreach (array_keys($players) as $player_id) {
-                if ($player_id === $active_player_id) {
-                    $this->setPlayerScoresToDB($player_id, 0);
-                } else {
-                    $this->setPlayerScoresToDB($player_id, 1);
-                }
-            }
-
-            $this->notifyAllPlayers(
-                "gameEndWithNoPossibleMovement",
-                clienttranslate('Game ended with running out of possible movements, ${winnerName} won the game!'),
-                array(
-                    'loserName' => $this->getActivePlayerName(),
-                    'winnerName' => $this->getPlayerNameById($this->getOpponentId($active_player_id))
-                )
-            );
-
-            $this->setStat(0, "howGameEnded");
-            $this->gamestate->nextState('gameEnd');
-        }
-
-        if (count($token_board_state) === 1) {
-            $opponent_id = $this->getOpponentId($active_player_id);
-            $active_player_score = $this->getPlayerScoreFromDB($active_player_id);
-            $opponent_score = $this->getPlayerScoreFromDB($opponent_id);
-
-            $winner = $active_player_score > $opponent_score ? "active" : "opponent";
-
-            $this->notifyAllPlayers(
-                "gameEndWithScoring",
-                clienttranslate('Game ended. ${winnerName} has ${winnerScore} points while ${loserName} has ${loserScore} points. ${winnerName} won the game!'),
-                $winner === "active" ?
-                    array(
-                        'loserId' => $opponent_id,
-                        'opponentId' => $active_player_id,
-                        'loserName' => $this->getPlayerNameById($opponent_id),
-                        'winnerName' => $this->getActivePlayerName(),
-                        'winnerScore' => $active_player_score,
-                        'loserScore' => $opponent_score
-                    ) : array(
-                        'loserId' => $active_player_id,
-                        'opponentId' => $opponent_id,
-                        'loserName' => $this->getActivePlayerName(),
-                        'winnerName' => $this->getPlayerNameById($opponent_id),
-                        'winnerScore' => $opponent_score,
-                        'loserScore' => $active_player_score
-                    )
-            );
-
-            $this->setStat(1, "howGameEnded");
-            $this->gamestate->nextState('gameEnd');
-        }
+        $this->updatePlayerScoresToRepresentWinner();
+        $this->updateCurrentGameRound();
+        $this->handleRoundEndNotifications();
+        $this->handleRoundEndStateChange();
     }
 
 
@@ -331,16 +275,39 @@ class iye extends Table
         //
         //       if ($from_version <= 1405061421)
         //       {
-        //            // ! important ! Use DBPREFIX_<table_name> for all tables
+        //            // ! important ! Use DBPREFIX_<table_n
+        //       }ame> for all tables
         //
         //            $sql = "CREATE TABLE DBPREFIX_xxxxxxx ....";
         //            $this->applyDbUpgradeToAllDB( $sql );
-        //       }
     }
 
     /********************
      * UTILITY FUNCTIONS
      */
+
+    protected function setupNewGameRound()
+    {
+        $this->truncateTokenTable();
+        $this->createNewGameRound();
+        $this->resetPlayerScoresFromDB();
+
+        $new_round_tokens = $this->setupInitialTokens();
+
+        $sql = "INSERT INTO token (type, location, x, y) VALUES ";
+        $sql .= implode(",", $new_round_tokens);
+        $this->DbQuery($sql);
+    }
+    protected function truncateTokenTable()
+    {
+        $this->DbQuery("TRUNCATE TABLE token");
+    }
+
+    protected function createNewGameRound()
+    {
+        $sql = "INSERT INTO gameround (winner, is_current) VALUES (null, true)";
+        $this->DbQuery($sql);
+    }
 
     protected function setupInitialTokens()
     {
@@ -754,6 +721,13 @@ class iye extends Table
         return $init_player_scores;
     }
 
+    protected function resetPlayerScoresFromDB()
+    {
+        foreach ($this->getPlayerIds() as $player_id) {
+            $this->setPlayerScoresToDB($player_id, 0);
+        }
+    }
+
     protected function setPlayerScoresToDB($player_id, $score)
     {
         $sql = "UPDATE player SET player_score=$score WHERE player_id='$player_id'";
@@ -801,9 +775,138 @@ class iye extends Table
         return $player_scores;
     }
 
+    protected function updatePlayerScoresToRepresentWinner()
+    {
+        $active_player_id = $this->getActivePlayerId();
+        $players = $this->getPlayerIds();
+
+        $possible_kam_movements = $this->getPossibleKamMovements(intval($active_player_id));
+
+        if (empty($possible_kam_movements)) {
+            foreach ($players as $player_id) {
+                $updated_score = $player_id === $active_player_id ? 0 : 1;
+                $this->setPlayerScoresToDB($player_id, $updated_score);
+            }
+        }
+    }
+
     protected function getMovementStatName($spent_token)
     {
         return "{$spent_token}Movement";
+    }
+
+    protected function getGameRoundHistory()
+    {
+        $sql = "SELECT * FROM gameround";
+        return self::getObjectListFromDB($sql);
+    }
+
+    protected function getPlayerWonRounds($player_id)
+    {
+        $sql = "SELECT * FROM gameround WHERE winner='$player_id'";
+        return self::getObjectListFromDB($sql);
+    }
+
+    protected function getCurrentGameRound()
+    {
+        $sql = "SELECT * FROM gameround WHERE is_current=1";
+        return self::getObjectListFromDB($sql);
+    }
+
+    protected function updateCurrentGameRound()
+    {
+        $player_ids = $this->getPlayerIds();
+        $winning_score = 0;
+        $winning_player_id = null;
+        $current_game_round = $this->getCurrentGameRound();
+        $current_game_round_id = $current_game_round[0]["id"];
+
+        foreach ($player_ids as $player_id) {
+            $player_score = $this->getPlayerScoreFromDB($player_id);
+
+            if (intval($player_score) > $winning_score) {
+                $winning_score = intval($player_score);
+                $winning_player_id = $player_id;
+            }
+        }
+
+        $sql = "UPDATE gameround SET winner='$winning_player_id', is_current=false WHERE id='$current_game_round_id'";
+        $this->DbQuery($sql);
+    }
+
+
+    protected function handleRoundEndNotifications()
+    {
+        $active_player_id = $this->getActivePlayerId();
+        $possible_kam_movements = $this->getPossibleKamMovements(intval($active_player_id));
+        $token_board_state = $this->getTokenBoardStateFromDB();
+
+        if (empty($possible_kam_movements)) {
+            $this->notifyAllPlayers(
+                "roundEndWithNoPossibleMovement",
+                clienttranslate('Round ended with running out of possible movements, ${winnerName} won the round!'),
+                array(
+                    'loserName' => $this->getActivePlayerName(),
+                    'winnerName' => $this->getPlayerNameById($this->getOpponentId($active_player_id))
+                )
+            );
+
+            $this->setStat(0, "howRoundEnded");
+        }
+
+        if (count($token_board_state) === 1) {
+            $opponent_id = $this->getOpponentId($active_player_id);
+            $active_player_score = $this->getPlayerScoreFromDB($active_player_id);
+            $opponent_score = $this->getPlayerScoreFromDB($opponent_id);
+            $winner = $active_player_score > $opponent_score ? "active" : "opponent";
+
+            $this->notifyAllPlayers(
+                "roundEndWithScoring",
+                clienttranslate('Round ended. ${winnerName} has ${winnerScore} points while ${loserName} has ${loserScore} points. ${winnerName} won the round!'),
+                $winner === "active" ?
+                    array(
+                        'loserId' => $opponent_id,
+                        'opponentId' => $active_player_id,
+                        'loserName' => $this->getPlayerNameById($opponent_id),
+                        'winnerName' => $this->getActivePlayerName(),
+                        'winnerScore' => $active_player_score,
+                        'loserScore' => $opponent_score
+                    ) : array(
+                        'loserId' => $active_player_id,
+                        'opponentId' => $opponent_id,
+                        'loserName' => $this->getActivePlayerName(),
+                        'winnerName' => $this->getPlayerNameById($opponent_id),
+                        'winnerScore' => $opponent_score,
+                        'loserScore' => $active_player_score
+                    )
+            );
+
+            $this->setStat(1, "howRoundEnded");
+        }
+    }
+
+    protected function handleRoundEndStateChange()
+    {
+        $required_round_win = $this->gamestate->table_globals[100] === "2" ? 2 : 1;
+        $player_ids = $this->getPlayerIds();
+
+        $gamerounds = [];
+        $should_game_end = false;
+
+        foreach ($player_ids as $player_id) {
+            $player_won_round_count = count($this->getPlayerWonRounds($player_id));
+            if ($player_won_round_count === intval($required_round_win)) {
+                $should_game_end = true;
+            }
+            array_push($gamerounds, [$player_id => $player_won_round_count]);
+        }
+
+        if (!$should_game_end) {
+            // TODO should update all players about new round
+            $this->gamestate->nextState("newRound");
+        } else {
+            $this->gamestate->nextState("gameEnd");
+        }
     }
 
     /**

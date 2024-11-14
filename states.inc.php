@@ -16,8 +16,15 @@ $machinestates = [
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => ["" => STATE_PLAYER_MOVE_KAM]
+        "transitions" => ["" => STATE_PREPARE_NEW_ROUND]
     ),
+    STATE_PREPARE_NEW_ROUND => [
+        "name" => "prepareNewRound",
+        "description" => clienttranslate("Preparing iye for a new round"),
+        "type" => "manager",
+        "action" => "stPrepareNewRound",
+        "transitions" => ["movePlayerTurns" => STATE_PLAYER_MOVE_KAM]
+    ],
     STATE_PLAYER_MOVE_KAM => [
         "name" => "playerMoveKam",
         "description" => clienttranslate('${actplayer} must move kam to a valid position'),
@@ -34,14 +41,14 @@ $machinestates = [
         "type" => "game",
         "action" => "stNextPlayer",
         "updateGameProgression" => true,
-        "transitions" => ["nextTurn" => STATE_PLAYER_MOVE_KAM, "prepareGameEnd" => STATE_PREPARE_GAME_END]
+        "transitions" => ["nextTurn" => STATE_PLAYER_MOVE_KAM, "prepareRoundEnd" => STATE_PREPARE_ROUND_END]
     ],
-    STATE_PREPARE_GAME_END => [
-        "name" => "pregameEnd",
-        "description" => clienttranslate('Calculating game end'),
+    STATE_PREPARE_ROUND_END => [
+        "name" => "pregameRoundEnd",
+        "description" => clienttranslate('Calculating round end'),
         "type" => "game",
-        "action" => "stPrepareGameEnd",
-        "transitions" => array("gameEnd" => STATE_GAME_END)
+        "action" => "stPrepareRoundEnd",
+        "transitions" => ["newRound" => STATE_PREPARE_NEW_ROUND, "gameEnd" => STATE_GAME_END]
     ],
     STATE_GAME_END => [
         "name" => "gameEnd",

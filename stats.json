@@ -1,8 +1,8 @@
 {
   "table": {
-    "howGameEnded": {
+    "howRoundEnded": {
       "id": 20,
-      "name": "How did the game end?",
+      "name": "How did the round end?",
       "type": "int"
     }
   },

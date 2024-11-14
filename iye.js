@@ -372,9 +372,10 @@ define([
     },
     setupNotifications: function () {
       const notifications = [
+        ["newRound"],
         ["playerTurn", 1000],
-        ["gameEndWithNoPossibleMovement", 1000],
-        ["gameEndWithScoring", 1000],
+        ["roundEndWithNoPossibleMovement", 1000],
+        ["roundEndWithScoring", 1000],
       ];
 
       notifications.forEach((notification) => {
@@ -382,6 +383,9 @@ define([
         dojo.subscribe(name, this, `notif_${name}`);
         this.notifqueue.setSynchronous(name, timeout);
       });
+    },
+    notif_newRound: function (notification) {
+      console.log(notification.args);
     },
     notif_playerTurn: function (notification) {
       const {
@@ -422,10 +426,10 @@ define([
       );
       this.updatePlayerScores(playerScores);
     },
-    notif_gameEndWithNoPossibleMovement: function (notification) {
+    notif_roundEndWithNoPossibleMovement: function (notification) {
       console.log("Game end with no possible movement", notification);
     },
-    notif_gameEndWithScoring: function (notification) {
+    notif_roundEndWithScoring: function (notification) {
       console.log("Game end with scoring", notification);
     },
 

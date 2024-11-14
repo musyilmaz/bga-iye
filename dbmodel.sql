@@ -15,3 +15,10 @@ CREATE TABLE IF NOT EXISTS `token` (
   `y` smallint(5),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `gameround` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `is_current` boolean,
+  `winner` varchar(16),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
