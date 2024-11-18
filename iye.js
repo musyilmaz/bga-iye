@@ -8,6 +8,7 @@
  * -----
  */
 
+const PREPARE_NEW_ROUND = "prepareNewRound";
 const PLAYER_MOVE_KAM = "playerMoveKam";
 const CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE = "client_playerSelectTokenToMove";
 const CLIENT_PLAYER_CONFIRM_MOVE = "client_playerConfirmMove";
@@ -54,7 +55,11 @@ define([
     },
     onEnteringState: function (stateName, args) {
       switch (stateName) {
+        case PREPARE_NEW_ROUND: {
+          break;
+        }
         case PLAYER_MOVE_KAM: {
+          console.log("Entering this state maybe?");
           this.updatePossibleKamCoordinates(args.args.possibleCoordinates);
           break;
         }
@@ -68,6 +73,9 @@ define([
     },
     onLeavingState: function (stateName) {
       switch (stateName) {
+        case PREPARE_NEW_ROUND: {
+          break;
+        }
         case PLAYER_MOVE_KAM: {
           break;
         }
@@ -82,6 +90,9 @@ define([
     onUpdateActionButtons: function (stateName, args) {
       if (this.isCurrentPlayerActive()) {
         switch (stateName) {
+          case PREPARE_NEW_ROUND: {
+            break;
+          }
           case PLAYER_MOVE_KAM: {
             break;
           }
@@ -184,6 +195,10 @@ define([
       tokenState["board"].map((token) => {
         this.placeTokenOnBoard(token);
       });
+    },
+    clearTokens: function () {
+      const tokens = document.getElementById("iye_tokens");
+      tokens.innerHTML = null;
     },
     placeTokenOnBoard: function (token) {
       const { x, y, type } = token;
@@ -386,6 +401,22 @@ define([
     },
     notif_newRound: function (notification) {
       console.log(notification.args);
+      const {
+        playerScores,
+        players,
+        playerTokenState,
+        tokenTypes,
+        tokenState,
+      } = notification.args;
+
+      this.updatePlayerScores(playerScores);
+      this.setupPlayerBoards(players, playerTokenState, tokenTypes);
+      this.setupGameInformationPanel(
+        tokenState.board.filter((t) => t.type !== "kam"),
+        tokenTypes
+      );
+      this.clearTokens();
+      this.setupTokens({ tokenState });
     },
     notif_playerTurn: function (notification) {
       const {

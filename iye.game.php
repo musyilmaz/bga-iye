@@ -205,11 +205,15 @@ class iye extends Table
 
     public function stPrepareNewRound(): void
     {
-
         $this->setupNewGameRound();
 
         $this->notifyAllPlayers("newRound", clienttranslate("A new round is beginning."), array(
-            "test" => "test"
+            'activePlayer' => $this->getActivePlayerId(),
+            'players' => $this->loadPlayersBasicInfos(),
+            'tokenTypes' => $this->token_types,
+            'tokenState' => $this->groupBy($this->getTokenStateFromDB(), "location"),
+            'playerScores' => $this->calculatePlayerScores(),
+            'playerTokenState' => $this->getPlayerTokenStateFromDB()
         ));
 
         $this->gamestate->nextState("movePlayerTurns");
@@ -902,7 +906,6 @@ class iye extends Table
         }
 
         if (!$should_game_end) {
-            // TODO should update all players about new round
             $this->gamestate->nextState("newRound");
         } else {
             $this->gamestate->nextState("gameEnd");
