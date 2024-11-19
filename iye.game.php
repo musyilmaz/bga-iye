@@ -311,7 +311,7 @@ class iye extends Table
     }
     protected function truncateTokenTable()
     {
-        $this->DbQuery("TRUNCATE TABLE token");
+        $this->DbQuery("DELETE FROM token");
     }
 
     protected function createNewGameRound()
