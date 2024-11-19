@@ -18,7 +18,8 @@ define("STATE_GAME_SETUP", 1);
 define("STATE_PREPARE_NEW_ROUND", 2);
 define("STATE_PLAYER_MOVE_KAM", 10);
 define("STATE_NEXT_PLAYER", 20);
-define("STATE_PREPARE_ROUND_END", 98);
+define("STATE_PREPARE_ROUND_END", 90);
+define("STATE_PREPARE_GAME_END", 98);
 define("STATE_GAME_END", 99);
 
 class iye extends Table
@@ -256,8 +257,11 @@ class iye extends Table
         $this->handleRoundEndStateChange();
     }
 
-
-
+    public function stPrepareGameend(): void
+    {
+        $this->updatePlayerScoresToRepresentGameEnd();
+        $this->handleGameEndNotifications();
+    }
 
     /**
      * Migrate database.
@@ -801,10 +805,10 @@ class iye extends Table
     {
         $players = $this->getPlayerIds();
 
-        $game_rounds = $this->getCompletedGameRoundHistory();
+        $game_rounds = $this->getGameRoundHistory();
         foreach ($players as $player_id) {
             $game_round_score = count(array_filter($game_rounds, function ($game_round) use ($player_id) {
-                return $game_round["winner"] === $player_id;
+                return $game_round["winner"] === strval($player_id);
             }));
 
             $this->setPlayerScoresToDB($player_id, $game_round_score);
@@ -861,7 +865,6 @@ class iye extends Table
         $this->DbQuery($sql);
     }
 
-
     protected function handleRoundEndNotifications()
     {
         $active_player_id = $this->getActivePlayerId();
@@ -912,6 +915,38 @@ class iye extends Table
         }
     }
 
+    protected function handleGameEndNotifications()
+    {
+        $player_scores = array();
+        $player_ids = $this->getPlayerIds();
+
+        foreach ($player_ids as $player_id) {
+            $player_score = $this->getPlayerScoreFromDB($player_id);
+            $player_scores[$player_id] = $player_score;
+        }
+
+        $first_player_id = array_key_first($player_scores);
+        $second_player_id = array_key_last($player_scores);
+
+        $first_player_score = $player_scores[$first_player_id];
+        $second_player_score = $player_scores[$second_player_id];
+
+        $winner = $first_player_score > $second_player_score ? "first" : "second";
+
+        $this->notifyAllPlayers(
+            "gameEnd",
+            clienttranslate('Game ended. ${winnerName} has ${winnerScore} round wins while ${loserName} has ${loserScore} round wins. ${winnerName} won the game!'),
+            array(
+                "winnerName" => $this->getPlayerNameById($winner === "first" ? $first_player_id : $second_player_id),
+                "loserName" => $this->getPlayerNameById($winner === "first" ? $second_player_id : $first_player_id),
+                "winnerScore" => $winner === "first" ? $first_player_score : $second_player_score,
+                "loserScore" => $winner === "first" ? $second_player_score : $first_player_score,
+            )
+        );
+
+        $this->gamestate->nextState("gameEnd");
+    }
+
     protected function handleRoundEndStateChange()
     {
         $required_round_win = $this->gamestate->table_globals[100] === "2" ? 2 : 1;
@@ -931,8 +966,7 @@ class iye extends Table
         if (!$should_game_end) {
             $this->gamestate->nextState("newRound");
         } else {
-            $this->updatePlayerScoresToRepresentGameEnd();
-            $this->gamestate->nextState("gameEnd");
+            $this->gamestate->nextState("prepareGameEnd");
         }
     }
 

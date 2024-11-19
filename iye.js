@@ -12,6 +12,7 @@ const PREPARE_NEW_ROUND = "prepareNewRound";
 const PLAYER_MOVE_KAM = "playerMoveKam";
 const CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE = "client_playerSelectTokenToMove";
 const CLIENT_PLAYER_CONFIRM_MOVE = "client_playerConfirmMove";
+const PREPARE_GAME_END = "prepareGameEnd";
 const BGA_HELP_FOLDED_HELP = "BgaHelp_IyeFoldedHelp";
 
 define([
@@ -406,6 +407,7 @@ define([
         ["playerTurn", 1000],
         ["roundEndWithNoPossibleMovement", 1000],
         ["roundEndWithScoring", 1000],
+        ["gameEnd", 1000],
       ];
 
       notifications.forEach((notification) => {
@@ -484,10 +486,13 @@ define([
       this.updatePlayerScores(playerScores);
     },
     notif_roundEndWithNoPossibleMovement: function (notification) {
-      console.log("Game end with no possible movement", notification);
+      console.log("round end with no possible movement", notification);
     },
     notif_roundEndWithScoring: function (notification) {
-      console.log("Game end with scoring", notification);
+      console.log("round end with scoring", notification);
+    },
+    notif_gameEnd: function (notification) {
+      this.clearTokens();
     },
 
     /* @Override */

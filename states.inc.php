@@ -10,6 +10,8 @@
  * -----
  */
 
+use function PHPSTORM_META\type;
+
 $machinestates = [
     STATE_GAME_SETUP => array(
         "name" => "gameSetup",
@@ -46,9 +48,16 @@ $machinestates = [
     STATE_PREPARE_ROUND_END => [
         "name" => "pregameRoundEnd",
         "description" => clienttranslate('Calculating round end'),
-        "type" => "game",
+        "type" => "manager",
         "action" => "stPrepareRoundEnd",
-        "transitions" => ["newRound" => STATE_PREPARE_NEW_ROUND, "gameEnd" => STATE_GAME_END]
+        "transitions" => ["newRound" => STATE_PREPARE_NEW_ROUND, "prepareGameEnd" => STATE_PREPARE_GAME_END]
+    ],
+    STATE_PREPARE_GAME_END => [
+        "name" => "prepareGameEnd",
+        "description" => clienttranslate("Preparing for game end"),
+        "type" => "manager",
+        "action" => "stPrepareGameEnd",
+        "transitions" => ["gameEnd" => STATE_GAME_END]
     ],
     STATE_GAME_END => [
         "name" => "gameEnd",
