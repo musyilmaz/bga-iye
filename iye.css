@@ -18,7 +18,18 @@
  * Player Panel Boards
  *-------------------
  */
+
+html {
+  background-image: url("img/bg.jpg");
+  background-repeat: repeat;
+}
+
 .iye_player_board {
+  display: flex;
+  flex-direction: column;
+}
+
+.iye_player_token_area {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -26,7 +37,11 @@
   padding: 10px 10px 20px 10px;
 }
 
-.iye_player_board > .player_board_token {
+.iye_player_round_score {
+  padding: 5px 10px;
+}
+
+.iye_player_token_area > .player_board_token {
   position: relative;
   width: 40px;
   height: 40px;

@@ -134,6 +134,7 @@ class iye extends Table
         $result["tokenState"] = $this->groupBy($token_state_from_db, "location");
 
         $result["playerTokenState"] = $this->getPlayerTokenStateFromDB();
+        $result["playerRoundScores"] = $this->getCompletedGameRoundHistory();
 
         return $result;
     }
@@ -181,7 +182,8 @@ class iye extends Table
                 'players' => $this->loadPlayersBasicInfos(),
                 'tokenState' => $this->groupBy($this->getTokenStateFromDB(), "location"),
                 'playerTokenState' => $this->getPlayerTokenStateFromDB(),
-                'playerScores' => $player_scores
+                'playerScores' => $player_scores,
+                'playerRoundScores' => $this->getCompletedGameRoundHistory(),
             )
         );
 
@@ -213,7 +215,8 @@ class iye extends Table
             'tokenTypes' => $this->token_types,
             'tokenState' => $this->groupBy($this->getTokenStateFromDB(), "location"),
             'playerScores' => $this->calculatePlayerScores(),
-            'playerTokenState' => $this->getPlayerTokenStateFromDB()
+            'playerTokenState' => $this->getPlayerTokenStateFromDB(),
+            'playerRoundScores' => $this->getCompletedGameRoundHistory()
         ));
 
         $this->gamestate->nextState("movePlayerTurns");
@@ -794,6 +797,20 @@ class iye extends Table
         }
     }
 
+    protected function updatePlayerScoresToRepresentGameEnd()
+    {
+        $players = $this->getPlayerIds();
+
+        $game_rounds = $this->getCompletedGameRoundHistory();
+        foreach ($players as $player_id) {
+            $game_round_score = count(array_filter($game_rounds, function ($game_round) use ($player_id) {
+                return $game_round["winner"] === $player_id;
+            }));
+
+            $this->setPlayerScoresToDB($player_id, $game_round_score);
+        }
+    }
+
     protected function getMovementStatName($spent_token)
     {
         return "{$spent_token}Movement";
@@ -802,6 +819,12 @@ class iye extends Table
     protected function getGameRoundHistory()
     {
         $sql = "SELECT * FROM gameround";
+        return self::getObjectListFromDB($sql);
+    }
+
+    protected function getCompletedGameRoundHistory()
+    {
+        $sql = "SELECT * FROM gameround WHERE NOT winner='null'";
         return self::getObjectListFromDB($sql);
     }
 
@@ -908,6 +931,7 @@ class iye extends Table
         if (!$should_game_end) {
             $this->gamestate->nextState("newRound");
         } else {
+            $this->updatePlayerScoresToRepresentGameEnd();
             $this->gamestate->nextState("gameEnd");
         }
     }

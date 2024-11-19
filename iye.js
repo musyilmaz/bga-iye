@@ -31,6 +31,7 @@ define([
         playerTokenState,
         tokenState,
         materialInfo: { tokenTypes },
+        playerRoundScores,
       } = gamedatas;
 
       this.helpManager = new HelpManager(this.game, {
@@ -43,7 +44,12 @@ define([
         ],
       });
 
-      this.setupPlayerBoards(players, playerTokenState, tokenTypes);
+      this.setupPlayerBoards(
+        players,
+        playerTokenState,
+        playerRoundScores,
+        tokenTypes
+      );
       this.setupGameInformationPanel(
         tokenState.board.filter((t) => t.type !== "kam"),
         tokenTypes
@@ -59,7 +65,6 @@ define([
           break;
         }
         case PLAYER_MOVE_KAM: {
-          console.log("Entering this state maybe?");
           this.updatePossibleKamCoordinates(args.args.possibleCoordinates);
           break;
         }
@@ -110,7 +115,12 @@ define([
     ///////////////////////////////////////////////////
     //// Utility Functions
     ///////////////////////////////////////////////////
-    setupPlayerBoards: function (players, playerTokenState, tokenTypes) {
+    setupPlayerBoards: function (
+      players,
+      playerTokenState,
+      playerRoundScores,
+      tokenTypes
+    ) {
       for (playerId in players) {
         const playerTokens = {};
 
@@ -125,11 +135,16 @@ define([
           };
         });
 
+        const roundScore = playerRoundScores.filter(
+          (prs) => prs.winner === playerId
+        ).length;
+
         this.getPlayerPanelElement(playerId).innerHTML = this.format_block(
           "jstpl_player_board",
           {
             playerId,
             ...playerTokens,
+            roundScore,
           }
         );
       }
@@ -387,7 +402,7 @@ define([
     },
     setupNotifications: function () {
       const notifications = [
-        ["newRound"],
+        ["newRound", 1000],
         ["playerTurn", 1000],
         ["roundEndWithNoPossibleMovement", 1000],
         ["roundEndWithScoring", 1000],
@@ -400,17 +415,22 @@ define([
       });
     },
     notif_newRound: function (notification) {
-      console.log(notification.args);
       const {
         playerScores,
         players,
         playerTokenState,
         tokenTypes,
         tokenState,
+        playerRoundScores,
       } = notification.args;
 
       this.updatePlayerScores(playerScores);
-      this.setupPlayerBoards(players, playerTokenState, tokenTypes);
+      this.setupPlayerBoards(
+        players,
+        playerTokenState,
+        playerRoundScores,
+        tokenTypes
+      );
       this.setupGameInformationPanel(
         tokenState.board.filter((t) => t.type !== "kam"),
         tokenTypes
@@ -427,6 +447,7 @@ define([
         tokenTypes,
         players,
         playerScores,
+        playerRoundScores,
       } = notification.args;
 
       // Remove possible moves from previous state
@@ -450,7 +471,12 @@ define([
       this.moveKamToCoordinate(x, y);
       this.fadeOutAndDestroyToken(x, y);
 
-      this.setupPlayerBoards(players, playerTokenState, tokenTypes);
+      this.setupPlayerBoards(
+        players,
+        playerTokenState,
+        playerRoundScores,
+        tokenTypes
+      );
       this.setupGameInformationPanel(
         tokenState.board.filter((t) => t.type !== "kam"),
         tokenTypes
