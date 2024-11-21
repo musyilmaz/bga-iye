@@ -19,6 +19,7 @@ define("STATE_PREPARE_NEW_ROUND", 2);
 define("STATE_PLAYER_MOVE_KAM", 10);
 define("STATE_NEXT_PLAYER", 20);
 define("STATE_PREPARE_ROUND_END", 90);
+define("STATE_ROUND_END_CONFIRMATION", 91);
 define("STATE_PREPARE_GAME_END", 98);
 define("STATE_GAME_END", 99);
 
@@ -206,6 +207,18 @@ class iye extends Table
         ];
     }
 
+    public function actRoundEndConfirmation() {}
+
+    public function argRoundEndConfirmation(): array
+    {
+        return [];
+    }
+
+    public function stMultiPlayerInit(): void
+    {
+        $this->gamestate->setAllPlayersMultiactive();
+    }
+
     public function stPrepareNewRound(): void
     {
         $this->setupNewGameRound();
@@ -316,7 +329,8 @@ class iye extends Table
 
     protected function createNewGameRound()
     {
-        $sql = "INSERT INTO gameround (winner, is_current) VALUES (null, true)";
+        $player_ids = $this->getPlayerIds();
+        $sql = "INSERT INTO gameround (winner, is_current, player_1, player_1_score, player_2, player_2_score) VALUES (null, true, $player_ids[0], null, $player_ids[1], null)";
         $this->DbQuery($sql);
     }
 
@@ -964,7 +978,7 @@ class iye extends Table
         }
 
         if (!$should_game_end) {
-            $this->gamestate->nextState("newRound");
+            $this->gamestate->nextState("roundEndConfirmation");
         } else {
             $this->gamestate->nextState("prepareGameEnd");
         }

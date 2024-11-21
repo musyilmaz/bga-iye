@@ -12,6 +12,7 @@ const PREPARE_NEW_ROUND = "prepareNewRound";
 const PLAYER_MOVE_KAM = "playerMoveKam";
 const CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE = "client_playerSelectTokenToMove";
 const CLIENT_PLAYER_CONFIRM_MOVE = "client_playerConfirmMove";
+const ROUND_END_CONFIRMATION = "roundEndConfirmation";
 const PREPARE_GAME_END = "prepareGameEnd";
 const BGA_HELP_FOLDED_HELP = "BgaHelp_IyeFoldedHelp";
 
@@ -75,6 +76,10 @@ define([
         case CLIENT_PLAYER_CONFIRM_MOVE: {
           break;
         }
+        case ROUND_END_CONFIRMATION: {
+          console.log("entering round end confirmation");
+          break;
+        }
       }
     },
     onLeavingState: function (stateName) {
@@ -89,6 +94,10 @@ define([
           break;
         }
         case CLIENT_PLAYER_CONFIRM_MOVE: {
+          break;
+        }
+        case ROUND_END_CONFIRMATION: {
+          console.log("leaving round end confirmation");
           break;
         }
       }
@@ -108,6 +117,10 @@ define([
           }
           case CLIENT_PLAYER_CONFIRM_MOVE: {
             this.actionButtonsClientPlayerConfirmMove(args);
+            break;
+          }
+          case ROUND_END_CONFIRMATION: {
+            this.actionButttonsRoundEndConfirmation(args);
             break;
           }
         }
@@ -399,6 +412,12 @@ define([
         null,
         false,
         "gray"
+      );
+    },
+    actionButttonsRoundEndConfirmation: function (args) {
+      console.log("test");
+      this.addActionButton("confirm_round_end", _("Confirm Round End"), () =>
+        this.bgaPerformAction("actRoundEndConfirmation", {})
       );
     },
     setupNotifications: function () {

@@ -20,5 +20,9 @@ CREATE TABLE IF NOT EXISTS `gameround` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `is_current` boolean,
   `winner` varchar(16),
+  `player_1` varchar(16) NOT NULL,
+  `player_1_score` int(2),
+  `player_2` varchar(16) NOT NULL,
+  `player_2_score` int(2),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
