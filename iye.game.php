@@ -207,7 +207,11 @@ class iye extends Table
         ];
     }
 
-    public function actRoundEndConfirmation() {}
+    public function actRoundEndConfirmation()
+    {
+        $player_id = $this->getCurrentPlayerId();
+        $this->gamestate->setPlayerNonMultiactive($player_id, "newRound");
+    }
 
     public function argRoundEndConfirmation(): array
     {
