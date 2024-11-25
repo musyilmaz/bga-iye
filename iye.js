@@ -415,7 +415,6 @@ define([
       );
     },
     actionButttonsRoundEndConfirmation: function (args) {
-      console.log("test");
       this.addActionButton("confirm_round_end", _("Confirm Round End"), () =>
         this.bgaPerformAction("actRoundEndConfirmation", {})
       );

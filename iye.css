@@ -502,3 +502,17 @@ html {
   max-height: calc(80vh - 80px);
   overflow: auto;
 }
+
+#popin_tableWindow_title {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+#popin_tableWindow_contents .tableWindow {
+  display: flex;
+  flex-direction: column;
+}
+
+#popin_tableWindow_contents .tableWindow table {
+  margin-bottom: 20px;
+}

@@ -220,6 +220,43 @@ class iye extends Table
 
     public function stMultiPlayerInit(): void
     {
+        $players = $this->loadPlayersBasicInfos();
+        $completed_game_rounds = $this->getCompletedGameRoundHistory();
+        $last_game_round = end($completed_game_rounds);
+        $last_game_round_information = [
+            $last_game_round["player_1"] => $last_game_round["player_1_score"],
+            $last_game_round["player_2"] => $last_game_round["player_2_score"]
+        ];
+
+        $table_round_end[] = [
+            "Player Name",
+            "Round Score",
+        ];
+
+        foreach ($players as $player_id => $player) {
+            $player_name_cell = [
+                'str' => '${player_name}',
+                'args' => ['player_name' => $player['player_name']],
+            ];
+
+            array_push($table_round_end, [
+                $player_name_cell,
+                strval($last_game_round_information[$player_id]),
+            ]);
+        };
+
+        $this->notifyAllPlayers(
+            "tableWindow",
+            '',
+            array(
+                "id" => 'roundScoring',
+                "title" => clienttranslate("End of Round"),
+                "table" => $table_round_end,
+                "footer" => $last_game_round["win_condition"] = "natural" ? clienttranslate("Round ended with natural scoring") : clienttranslate("Round ended with a player has no possible kam movements"),
+                "closing" => clienttranslate("Close")
+            )
+        );
+
         $this->gamestate->setAllPlayersMultiactive();
     }
 
@@ -268,8 +305,7 @@ class iye extends Table
 
     public function stPrepareRoundEnd(): void
     {
-        $this->updatePlayerScoresToRepresentWinner();
-        $this->updateCurrentGameRound();
+        $this->updateDBForCurrentGameRound();
         $this->handleRoundEndNotifications();
         $this->handleRoundEndStateChange();
     }
@@ -334,7 +370,7 @@ class iye extends Table
     protected function createNewGameRound()
     {
         $player_ids = $this->getPlayerIds();
-        $sql = "INSERT INTO gameround (winner, is_current, player_1, player_1_score, player_2, player_2_score) VALUES (null, true, $player_ids[0], null, $player_ids[1], null)";
+        $sql = "INSERT INTO gameround (winner, win_condition, is_current, player_1, player_1_score, player_2, player_2_score) VALUES (null, null, true, $player_ids[0], null, $player_ids[1], null)";
         $this->DbQuery($sql);
     }
 
@@ -757,6 +793,7 @@ class iye extends Table
         }
     }
 
+
     protected function setPlayerScoresToDB($player_id, $score)
     {
         $sql = "UPDATE player SET player_score=$score WHERE player_id='$player_id'";
@@ -804,17 +841,57 @@ class iye extends Table
         return $player_scores;
     }
 
-    protected function updatePlayerScoresToRepresentWinner()
+    protected function updateDBForCurrentGameRound()
     {
+        $player_ids = $this->getPlayerIds();
         $active_player_id = $this->getActivePlayerId();
-        $players = $this->getPlayerIds();
-
+        $player_scores = [];
         $possible_kam_movements = $this->getPossibleKamMovements(intval($active_player_id));
+        $win_condition = empty($possible_kam_movements) ? "no_movement" : "natural";
+        $winning_player_id = null;
+        $winning_score = 0;
+        $player_1_score = 0;
+        $player_2_score = 0;
+        $current_game_round = $this->getCurrentGameRound();
+        $current_game_round_id = $current_game_round[0]["id"];
+        $player_1_id = strval($current_game_round[0]["player_1"]);
+        $player_2_id = strval($current_game_round[0]["player_2"]);
 
-        if (empty($possible_kam_movements)) {
-            foreach ($players as $player_id) {
-                $updated_score = $player_id === $active_player_id ? 0 : 1;
-                $this->setPlayerScoresToDB($player_id, $updated_score);
+        foreach ($player_ids as $player_id) {
+            $player_score = $this->getPlayerScoreFromDB($player_id);
+
+            $player_scores[$player_id] = $player_score;
+
+            if (strval($player_id) === $player_1_id) {
+                $player_1_score = $player_score;
+            }
+
+            if (strval($player_id) === $player_2_id) {
+                $player_2_score = $player_score;
+            }
+
+            if ($player_1_score === $player_2_score) {
+                $winning_player_id = "tie";
+            } else {
+                if (intval($player_score) > $winning_score) {
+                    $winning_score = intval($player_score);
+                    $winning_player_id = $player_id;
+                }
+            }
+        }
+
+        $update_gameround_sql = "UPDATE gameround SET 
+            is_current=false, 
+            winner='$winning_player_id', 
+            win_condition='$win_condition',
+            player_1_score=$player_1_score, 
+            player_2_score=$player_2_score 
+            WHERE id='$current_game_round_id'";
+        $this->DbQuery($update_gameround_sql);
+
+        if ($win_condition === "no_movement") {
+            foreach ($player_ids as $player_id) {
+                $this->setPlayerScoresToDB($player_id, $player_id === $active_player_id ? 0 : 1);
             }
         }
     }
@@ -860,27 +937,6 @@ class iye extends Table
     {
         $sql = "SELECT * FROM gameround WHERE is_current=1";
         return self::getObjectListFromDB($sql);
-    }
-
-    protected function updateCurrentGameRound()
-    {
-        $player_ids = $this->getPlayerIds();
-        $winning_score = 0;
-        $winning_player_id = null;
-        $current_game_round = $this->getCurrentGameRound();
-        $current_game_round_id = $current_game_round[0]["id"];
-
-        foreach ($player_ids as $player_id) {
-            $player_score = $this->getPlayerScoreFromDB($player_id);
-
-            if (intval($player_score) > $winning_score) {
-                $winning_score = intval($player_score);
-                $winning_player_id = $player_id;
-            }
-        }
-
-        $sql = "UPDATE gameround SET winner='$winning_player_id', is_current=false WHERE id='$current_game_round_id'";
-        $this->DbQuery($sql);
     }
 
     protected function handleRoundEndNotifications()
