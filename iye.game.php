@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 require_once(APP_GAMEMODULE_PATH . "module/table/table.game.php");
 
+
 define("STATE_GAME_SETUP", 1);
 define("STATE_PREPARE_NEW_ROUND", 2);
 define("STATE_PLAYER_MOVE_KAM", 10);
@@ -168,8 +169,8 @@ class iye extends Table
         $this->notifyAllPlayers(
             "playerTurn",
             $spent_token === "basic" ?
-                clienttranslate('${playerName} moves kam to (${x}, ${y}) coordinates with basic movement. ${opponentName} receives ${targetToken.type}.') :
-                clienttranslate('${playerName} moves kam to (${x}, ${y}) coordinates with ${spentToken} movement. ${opponentName} receives ${targetToken.type}.'),
+                clienttranslate('${playerName} moves kam with basic movement. ${opponentName} receives ${giveToken}.') :
+                clienttranslate('${playerName} moves kam with ${spentToken}. ${opponentName} receives ${giveToken}.'),
             array(
                 'playerId' => $player_id,
                 'playerName' => $this->getActivePlayerName(),
@@ -177,6 +178,7 @@ class iye extends Table
                 'opponentName' => $this->getPlayerNameById($opponent_id),
                 'x' => $x,
                 'y' => $y,
+                'giveToken' => $target_token["type"],
                 'spentToken' => $spent_token,
                 'targetToken' => $target_token,
                 'tokenState' => $tokenState,

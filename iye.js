@@ -620,5 +620,37 @@ define([
         </div>
       `;
     },
+
+    /* @Override */
+    format_string_recursive: function format_string_recursive(log, args) {
+      console.log(log, args);
+      try {
+        if (log && args && !args.processed) {
+          args.processed = true;
+
+          // Special keys to replace with images
+          const keys = ["spentToken", "giveToken"];
+
+          for (const i in keys) {
+            const key = keys[i];
+            if (key in args) {
+              args[key] = this.getLogInjection(key, args);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(log, args, "Exception thrown", e.stack);
+      }
+
+      return this.inherited({ callee: format_string_recursive }, arguments);
+    },
+    getLogInjection: function (key, args) {
+      switch (key) {
+        case "spentToken":
+        case "giveToken": {
+          return `<div class="log_token" data-token-type=${args[key]}></div>`;
+        }
+      }
+    },
   });
 });

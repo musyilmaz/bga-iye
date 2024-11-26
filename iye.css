@@ -516,3 +516,33 @@ html {
 #popin_tableWindow_contents .tableWindow table {
   margin-bottom: 20px;
 }
+
+.log_token {
+  display: inline-block;
+  position: relative;
+  width: 24px;
+  height: 24px;
+  background-image: url("img/tokens.jpg");
+  background-size: auto 100%;
+  vertical-align: middle;
+}
+
+.log_token[data-token-type="owl"] {
+  background-position-x: 0px;
+}
+
+.log_token[data-token-type="water"] {
+  background-position-x: -24px;
+}
+
+.log_token[data-token-type="tree"] {
+  background-position-x: -48px;
+}
+
+.log_token[data-token-type="horse"] {
+  background-position-x: -72px;
+}
+
+.log_token[data-token-type="sun"] {
+  background-position-x: -96px;
+}
