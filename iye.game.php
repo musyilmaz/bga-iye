@@ -169,8 +169,8 @@ class iye extends Table
         $this->notifyAllPlayers(
             "playerTurn",
             $spent_token === "basic" ?
-                clienttranslate('${playerName} moves kam with basic movement. ${opponentName} receives ${giveToken}.') :
-                clienttranslate('${playerName} moves kam with ${spentToken}. ${opponentName} receives ${giveToken}.'),
+                clienttranslate('${playerName} moves kam with basic movement. ${opponentName} receives ${logTargetToken}.') :
+                clienttranslate('${playerName} moves kam with ${logSpentToken}. ${opponentName} receives ${logTargetToken}.'),
             array(
                 'playerId' => $player_id,
                 'playerName' => $this->getActivePlayerName(),
@@ -178,7 +178,8 @@ class iye extends Table
                 'opponentName' => $this->getPlayerNameById($opponent_id),
                 'x' => $x,
                 'y' => $y,
-                'giveToken' => $target_token["type"],
+                'logTargetToken' => $target_token["type"],
+                'logSpentToken' => $spent_token,
                 'spentToken' => $spent_token,
                 'targetToken' => $target_token,
                 'tokenState' => $tokenState,

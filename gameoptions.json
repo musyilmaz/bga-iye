@@ -3,10 +3,10 @@
     "name": "Match type",
     "values": {
       "1": {
-        "name": "Best of 1"
+        "name": "Single win required"
       },
       "2": {
-        "name": "Best of 3"
+        "name": "2 win required"
       }
     },
     "default": 2

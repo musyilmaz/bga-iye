@@ -623,13 +623,12 @@ define([
 
     /* @Override */
     format_string_recursive: function format_string_recursive(log, args) {
-      console.log(log, args);
       try {
         if (log && args && !args.processed) {
           args.processed = true;
 
           // Special keys to replace with images
-          const keys = ["spentToken", "giveToken"];
+          const keys = ["logSpentToken", "logTargetToken"];
 
           for (const i in keys) {
             const key = keys[i];
@@ -646,8 +645,8 @@ define([
     },
     getLogInjection: function (key, args) {
       switch (key) {
-        case "spentToken":
-        case "giveToken": {
+        case "logSpentToken":
+        case "logTargetToken": {
           return `<div class="log_token" data-token-type=${args[key]}></div>`;
         }
       }
