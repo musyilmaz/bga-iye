@@ -370,7 +370,7 @@ class iye extends Table
         $this->handleRoundEndStateChange();
     }
 
-    public function stPrepareGameend(): void
+    public function stPrepareGameEnd(): void
     {
         $this->updatePlayerScoresToRepresentGameEnd();
         $this->handleGameEndNotifications();
@@ -917,6 +917,12 @@ class iye extends Table
         $player_1_id = strval($current_game_round[0]["player_1"]);
         $player_2_id = strval($current_game_round[0]["player_2"]);
 
+        if ($win_condition === "no_movement") {
+            foreach ($player_ids as $player_id) {
+                $this->setPlayerScoresToDB($player_id, $player_id === $active_player_id ? 0 : 1);
+            }
+        }
+
         foreach ($player_ids as $player_id) {
             $player_score = $this->getPlayerScoreFromDB($player_id);
 
@@ -948,12 +954,6 @@ class iye extends Table
             player_2_score=$player_2_score 
             WHERE id='$current_game_round_id'";
         $this->DbQuery($update_gameround_sql);
-
-        if ($win_condition === "no_movement") {
-            foreach ($player_ids as $player_id) {
-                $this->setPlayerScoresToDB($player_id, $player_id === $active_player_id ? 0 : 1);
-            }
-        }
     }
 
     protected function updatePlayerScoresToRepresentGameEnd()
