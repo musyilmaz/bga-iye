@@ -23,7 +23,19 @@ $machinestates = [
         "description" => clienttranslate("Preparing iye for a new round"),
         "type" => "manager",
         "action" => "stPrepareNewRound",
-        "transitions" => ["movePlayerTurns" => STATE_PLAYER_MOVE_KAM]
+        "transitions" => [
+            "makeLastLoserActivePlayer" => STATE_MAKE_LAST_LOSER_ACTIVE_PLAYER,
+            "movePlayerTurns" => STATE_PLAYER_MOVE_KAM
+        ]
+    ],
+    STATE_MAKE_LAST_LOSER_ACTIVE_PLAYER => [
+        "name" => "makeLastLoserActivePlayer",
+        "type" => "game",
+        "action" => "stMakeLastLoserActivePlayer",
+        "updateGameProgression" => false,
+        "transitions" => [
+            "movePlayerTurns" => STATE_PLAYER_MOVE_KAM
+        ]
     ],
     STATE_PLAYER_MOVE_KAM => [
         "name" => "playerMoveKam",

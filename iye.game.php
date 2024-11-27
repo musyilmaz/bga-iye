@@ -17,6 +17,7 @@ require_once(APP_GAMEMODULE_PATH . "module/table/table.game.php");
 
 define("STATE_GAME_SETUP", 1);
 define("STATE_PREPARE_NEW_ROUND", 2);
+define("STATE_MAKE_LAST_LOSER_ACTIVE_PLAYER", 3);
 define("STATE_PLAYER_MOVE_KAM", 10);
 define("STATE_NEXT_PLAYER", 20);
 define("STATE_PREPARE_ROUND_END", 90);
@@ -277,6 +278,23 @@ class iye extends Table
             'playerRoundScores' => $this->getCompletedGameRoundHistory()
         ));
 
+        $completed_game_rounds = $this->getCompletedGameRoundHistory();
+        $this->dump("completed game rounds", $completed_game_rounds);
+
+        if (count($completed_game_rounds) > 0) {
+            $this->gamestate->nextState("makeLastLoserActivePlayer");
+        } else {
+            $this->gamestate->nextState("movePlayerTurns");
+        }
+    }
+
+    public function stMakeLastLoserActivePlayer(): void
+    {
+        $last_round_winner = intval($this->getLastRoundWinnerPlayerId());
+        $this->dump("last round winner id", $last_round_winner);
+        $this->dump("opponent id", $this->getOpponentId($last_round_winner));
+
+        $this->gamestate->changeActivePlayer($this->getOpponentId($last_round_winner));
         $this->gamestate->nextState("movePlayerTurns");
     }
 
@@ -928,6 +946,12 @@ class iye extends Table
     {
         $sql = "SELECT * FROM gameround WHERE NOT winner='null'";
         return self::getObjectListFromDB($sql);
+    }
+
+    protected function getLastRoundWinnerPlayerId()
+    {
+        $sql = "SELECT winner FROM gameround WHERE NOT winner='null' ORDER BY id DESC LIMIT 1";
+        return self::getUniqueValueFromDB($sql);
     }
 
     protected function getPlayerWonRounds($player_id)
