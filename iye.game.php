@@ -301,7 +301,6 @@ class iye extends Table
         ));
 
         $completed_game_rounds = $this->getCompletedGameRoundHistory();
-        $this->dump("completed game rounds", $completed_game_rounds);
 
         if (count($completed_game_rounds) > 0) {
             $this->gamestate->nextState("makeLastLoserActivePlayer");
@@ -312,18 +311,30 @@ class iye extends Table
 
     public function stMakeLastLoserActivePlayer(): void
     {
-        $last_round_winner = intval($this->getLastRoundWinnerPlayerId());
-        $this->gamestate->changeActivePlayer($this->getOpponentId($last_round_winner));
 
-        $this->notifyAllPlayers(
-            "makeLastLoserActivePlayer",
-            clienttranslate('Loser of last round (${playerName}) must select who to start new round.'),
-            array(
-                'playerName' => $this->getActivePlayerName()
-            )
-        );
+        $last_round_winner = $this->getLastRoundWinnerPlayerId();
 
-        $this->gamestate->nextState("determineActivePlayer");
+        if ($last_round_winner === "tie") {
+            $this->notifyAllPlayers(
+                "noActivePlayerChangeDueToTie",
+                clienttranslate('Last round completed with a tie, game will continue as intended.'),
+                array()
+            );
+
+            $this->gamestate->nextState("movePlayerTurns");
+        } else {
+            $this->gamestate->changeActivePlayer($this->getOpponentId(intval($last_round_winner)));
+
+            $this->notifyAllPlayers(
+                "makeLastLoserActivePlayer",
+                clienttranslate('Loser of last round (${playerName}) must select who to start new round.'),
+                array(
+                    'playerName' => $this->getActivePlayerName()
+                )
+            );
+
+            $this->gamestate->nextState("determineActivePlayer");
+        }
     }
 
     /**

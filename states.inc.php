@@ -34,6 +34,7 @@ $machinestates = [
         "action" => "stMakeLastLoserActivePlayer",
         "updateGameProgression" => false,
         "transitions" => [
+            "movePlayerTurns" => STATE_PLAYER_MOVE_KAM,
             "determineActivePlayer" => STATE_DETERMINE_ACTIVE_PLAYER
         ]
     ],
