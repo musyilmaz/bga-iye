@@ -18,6 +18,7 @@ require_once(APP_GAMEMODULE_PATH . "module/table/table.game.php");
 define("STATE_GAME_SETUP", 1);
 define("STATE_PREPARE_NEW_ROUND", 2);
 define("STATE_MAKE_LAST_LOSER_ACTIVE_PLAYER", 3);
+define("STATE_DETERMINE_ACTIVE_PLAYER", 5);
 define("STATE_PLAYER_MOVE_KAM", 10);
 define("STATE_NEXT_PLAYER", 20);
 define("STATE_PREPARE_ROUND_END", 90);
@@ -141,6 +142,27 @@ class iye extends Table
         $result["playerRoundScores"] = $this->getCompletedGameRoundHistory();
 
         return $result;
+    }
+
+    public function actDetermineActivePlayer(int $player_id)
+    {
+        $this->notifyAllPlayers(
+            "determineActivePlayer",
+            clienttranslate('${playerName} will start new round'),
+            array('playerName' => $this->getPlayerNameById($player_id))
+        );
+        if ($this->getActivePlayerId() === strval($player_id)) {
+            $this->gamestate->nextState("movePlayerTurns");
+        } else {
+            $this->gamestate->nextState("nextPlayer");
+        }
+    }
+
+    public function argDetermineActivePlayer(): array
+    {
+        return [
+            "playerInformations" => $this->loadPlayersBasicInfos()
+        ];
     }
 
     /**
@@ -291,11 +313,17 @@ class iye extends Table
     public function stMakeLastLoserActivePlayer(): void
     {
         $last_round_winner = intval($this->getLastRoundWinnerPlayerId());
-        $this->dump("last round winner id", $last_round_winner);
-        $this->dump("opponent id", $this->getOpponentId($last_round_winner));
-
         $this->gamestate->changeActivePlayer($this->getOpponentId($last_round_winner));
-        $this->gamestate->nextState("movePlayerTurns");
+
+        $this->notifyAllPlayers(
+            "makeLastLoserActivePlayer",
+            clienttranslate('Loser of last round (${playerName}) must select who to start new round.'),
+            array(
+                'playerName' => $this->getActivePlayerName()
+            )
+        );
+
+        $this->gamestate->nextState("determineActivePlayer");
     }
 
     /**

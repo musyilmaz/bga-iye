@@ -9,6 +9,7 @@
  */
 
 const PREPARE_NEW_ROUND = "prepareNewRound";
+const DETERMINE_ACTIVE_PLAYER = "determineActivePlayer";
 const PLAYER_MOVE_KAM = "playerMoveKam";
 const CLIENT_PLAYER_SELECT_TOKEN_TO_MOVE = "client_playerSelectTokenToMove";
 const CLIENT_PLAYER_CONFIRM_MOVE = "client_playerConfirmMove";
@@ -66,6 +67,9 @@ define([
         case PREPARE_NEW_ROUND: {
           break;
         }
+        case DETERMINE_ACTIVE_PLAYER: {
+          break;
+        }
         case PLAYER_MOVE_KAM: {
           this.updatePossibleKamCoordinates(args.args.possibleCoordinates);
           break;
@@ -77,7 +81,6 @@ define([
           break;
         }
         case ROUND_END_CONFIRMATION: {
-          console.log("entering round end confirmation");
           break;
         }
       }
@@ -97,7 +100,6 @@ define([
           break;
         }
         case ROUND_END_CONFIRMATION: {
-          console.log("leaving round end confirmation");
           break;
         }
       }
@@ -106,6 +108,10 @@ define([
       if (this.isCurrentPlayerActive()) {
         switch (stateName) {
           case PREPARE_NEW_ROUND: {
+            break;
+          }
+          case DETERMINE_ACTIVE_PLAYER: {
+            this.actionButtonsDetermineActivePlayer(args);
             break;
           }
           case PLAYER_MOVE_KAM: {
@@ -418,6 +424,20 @@ define([
       this.addActionButton("confirm_round_end", _("Confirm Round End"), () =>
         this.bgaPerformAction("actRoundEndConfirmation", {})
       );
+    },
+    actionButtonsDetermineActivePlayer: function (args) {
+      const { playerInformations } = args;
+
+      for (const player of Object.values(playerInformations)) {
+        this.addActionButton(
+          `select_player_${player.player_id}`,
+          _(`${player.player_name}`),
+          () =>
+            this.bgaPerformAction("actDetermineActivePlayer", {
+              player_id: player.player_id,
+            })
+        );
+      }
     },
     setupNotifications: function () {
       const notifications = [

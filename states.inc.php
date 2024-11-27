@@ -34,7 +34,19 @@ $machinestates = [
         "action" => "stMakeLastLoserActivePlayer",
         "updateGameProgression" => false,
         "transitions" => [
-            "movePlayerTurns" => STATE_PLAYER_MOVE_KAM
+            "determineActivePlayer" => STATE_DETERMINE_ACTIVE_PLAYER
+        ]
+    ],
+    STATE_DETERMINE_ACTIVE_PLAYER => [
+        "name" => "determineActivePlayer",
+        "description" => clienttranslate('${actplayer} must select who to start round'),
+        "descriptionmyturn" => clienttranslate('${you} must select who to start round'),
+        "type" => "activeplayer",
+        "args" => "argDetermineActivePlayer",
+        "possibleactions" => ["actDetermineActivePlayer"],
+        "transitions" => [
+            "movePlayerTurns" => STATE_PLAYER_MOVE_KAM,
+            "nextPlayer" => STATE_NEXT_PLAYER
         ]
     ],
     STATE_PLAYER_MOVE_KAM => [
