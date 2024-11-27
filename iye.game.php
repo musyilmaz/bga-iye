@@ -247,8 +247,7 @@ class iye extends Table
     public function stMultiPlayerInit(): void
     {
         $players = $this->loadPlayersBasicInfos();
-        $completed_game_rounds = $this->getCompletedGameRoundHistory();
-        $last_game_round = end($completed_game_rounds);
+        $last_game_round = $this->getLastRound()[0];
         $last_game_round_information = [
             $last_game_round["player_1"] => $last_game_round["player_1_score"],
             $last_game_round["player_2"] => $last_game_round["player_2_score"]
@@ -984,6 +983,12 @@ class iye extends Table
     protected function getCompletedGameRoundHistory()
     {
         $sql = "SELECT * FROM gameround WHERE NOT winner='null'";
+        return self::getObjectListFromDB($sql);
+    }
+
+    protected function getLastRound()
+    {
+        $sql = "SELECT * FROM gameround WHERE NOT winner='null' ORDER BY id DESC LIMIT 1";
         return self::getObjectListFromDB($sql);
     }
 
