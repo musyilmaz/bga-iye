@@ -17,13 +17,13 @@ $gameinfos = [
     'publisher' => 'Neotroy Games',
 
     // Url of game publisher website
-    'publisher_website' => 'http://www.mypublishingcompany.com/',
+    'publisher_website' => 'https://www.neotroygames.com',
 
     // Board Game Geek ID of the publisher
     'publisher_bgg_id' => 32395,
 
     // Board game geek ID of the game
-    'bgg_id' => 340575,
+    'bgg_id' => 437478,
 
     // Players configuration that can be played (ex: 2 to 4 players)
     'players' => [2],
