@@ -325,21 +325,21 @@ html {
   overflow-y: scroll;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
 }
 
 .game-help-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-right: 20px;
+  gap: 2px;
+  padding-right: 16px;
 }
 
 .game-help-section::after {
   content: "";
   width: 50px;
   height: 2px;
-  margin: 10px auto;
+  margin: 16px auto;
   background-color: rgba(0, 0, 0, 0.6);
 }
 
@@ -351,11 +351,21 @@ html {
   color: red;
   font-weight: 700;
   font-size: 20px;
+  text-indent: 16px;
+}
+
+.game-help-section > .small-title {
+  color: red;
+  font-weight: 700;
+  font-size: 16px;
+  text-indent: 16px;
 }
 
 .game-help-section > .description {
   text-align: justify;
+  font-size: 16px;
   line-height: 1.6;
+  text-indent: 16px;
 }
 
 .token-distribution-table {
@@ -368,11 +378,6 @@ html {
   border: 1px solid rgba(0, 0, 0, 0.8);
   padding: 8px;
   text-align: center;
-}
-
-.token-distribution-table th:first-child {
-  border-top: none;
-  border-left: none;
 }
 
 .token-distribution-table .help-token {
@@ -404,6 +409,10 @@ html {
 
 .token-distribution-table .row-title {
   font-weight: 700;
+}
+
+.token-distribution-table .information-cell {
+  text-align: left;
 }
 
 #bga-help_buttons {

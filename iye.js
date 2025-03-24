@@ -40,7 +40,7 @@ define([
       this.helpManager = new HelpManager(this.game, {
         buttons: [
           new BgaHelpPopinButton({
-            title: _("Help"),
+            title: _("Quick Rules"),
             buttonBackground: "red",
             html: this.iyeHelpContent(),
           }),
@@ -541,57 +541,127 @@ define([
     iyeHelpContent: function () {
       return `
         <div class="game-help-wrapper">
-            ${this.gameObjectiveHelpSection()}
-            ${this.turnStructureHelpSection()}
-            ${this.endGameScoringHelpSection()}
-            ${this.naturalMovementHelpSection()}
-            ${this.iyeMovementHelpSection()}
+          ${this.gameSummaryHelpSection()}
+          ${this.gameStructureHelpSection()}
+          ${this.endOfCycleHelpSection()}
         </div>
       `;
     },
-    gameObjectiveHelpSection: function () {
-      const gameObjectiveDescription = _(
-        "IYE is played between 2 players with alternating turns. The game continues until either one player has no valid moves or both players have taken 12 turns, which means a single IYE token is left on the board. If the game ends with a player having no valid moves, that player loses immediately. If the game ends after both players have taken 12 turns, an endgame scoring determines the winner of the game."
+    gameSummaryHelpSection: function () {
+      const gameDescription = _(
+        "Iye is a two-player board game played in cycles with alternating turns. The game consists of one or more cycles, with players competing to win either 1 cycle (quick game) or 2 cycles (standard game)."
+      );
+
+      const gameCycleDescription = _(
+        "A cycle ends under two conditions: either when a player has no valid moves remaining, or when both players have completed 12 turns each, leaving just a single Iye token on the board. If a player cannot make a valid move, they immediately lose the cycle. If both players complete their 12 turns, the winner of the cycle is determined through end-cycle scoring."
       );
 
       return `
         <div class="game-help-section">
           <span class="title">${_("Game Objective")}</span>
-          <span class="description">${gameObjectiveDescription}</span>
+          <p class="description">${gameDescription}</p>
+          <p class="description">${gameCycleDescription}</p>
         </div>
       `;
     },
-    turnStructureHelpSection: function () {
-      const turnStructureDescription = _(
-        "Every turn, the active player moves KAM to a new position by either using natural movement or spending IYE from their supply. After moving KAM to a position, the active player gifts IYE on that position to their opponent, who may utilize it in future turns."
+    gameStructureHelpSection: function () {
+      const iyeMovementDescription = _(
+        "On your turn, you have to perform a <b>Natural Movement</b> or an <b>Iye Tile Movement</b> to move the shaman's drum. Empty board spaces cannot be a target for drum movement."
+      );
+
+      const naturalMovementDescription = _(
+        "Move the drum 1 or 2 spaces. You can only move it vertically or horizontally."
+      );
+      const iyeTileMovementDescription = _(
+        "Spend one of your iye tiles to utilise its special ability."
       );
 
       return `
         <div class="game-help-section">
-          <span class="title">${_("Turn Structure")}</span>
-          <span class="description">${turnStructureDescription}</span>
+          <span class="title">${_("Game Structure")}</span>
+          <p class="description">${iyeMovementDescription}</p>
+          <span class="small-title">${_("Natural Movement")}</span>
+          <p class="description">${naturalMovementDescription}</p>
+          <span class="small-title">${_("Iye Tile Movement")}</span>
+          <p class="description">${iyeTileMovementDescription}</p>
+          ${this.iyeTileMovementAndCountDistributionTable()}
         </div>
       `;
     },
-    endGameScoringHelpSection: function () {
-      const endGameWithNoValidMovementDescription = _(
-        "If the end of the game is triggered because there are no possible KAM movement positions, the active player instantly loses the game."
+    endOfCycleHelpSection: function () {
+      const endOfCycleDescription = _(
+        "There are two ways for a cycle to end; (1) no legal moves for the current player, (2) only a single iye tile left on the game board."
       );
 
-      const endGameWithNormalDescription = _(
-        "If the end of the game is triggered with only one IYE token left on the board, both players calculate their scores based on the remaining IYE tokens in their supplies. If a player has a majority of IYE tokens, they will receive points based on the chart below. In case of a tie, neither player scores. The player with the highest score wins the game."
+      const noValidMovementDescription = _(
+        "If a cycle ends because a player was not able to move, that player loses the cycle. In this case, there is no need for scoring."
+      );
+
+      const endOfCycleScoringDescription = _(
+        "If a cycle ends because there is a single iye tile left on the board, scoring ensues. Each type of iye is scored separately. <b>Whoever holds the greatest count of a particular type of iye, receives all the points for that type.</b> If both players hold an equal number of tiles regarding a type of iye, neither player scores any points."
+      );
+
+      const endOfCycleWinnerDescription = _(
+        "After every single type of iye has been scored, the player with the greater amount of points wins the cycle. The player who lost the cycle chooses the next cycle's first player."
+      );
+
+      const noCycleWinnerDescription = _(
+        "If the scores are tied, the cycle has no winners."
       );
 
       return `
         <div class="game-help-section">
-          <span class="title">${_("End of the Game")}</span>
-          <span class="description">${endGameWithNoValidMovementDescription}</span>
-          <span class="description">${endGameWithNormalDescription}</span>
-          ${this.tokenDistributionTable()}
+          <span class="title">${_("Enf of Cycle and Scoring")}</span>
+          <p class="description">${endOfCycleDescription}</p>
+          <p class="description">${noValidMovementDescription}</p>
+          <p class="description">${endOfCycleScoringDescription}</p>
+          <p class="description">${noCycleWinnerDescription}</p>
         </div>
       `;
     },
-    tokenDistributionTable: function () {
+    iyeTileMovementAndCountDistributionTable: function () {
+      return `
+        <table class="token-distribution-table">
+          <tr>
+            <th class="row-title">Iye</th>
+            <th class="row-title">Token Amount</th>
+            <th class="row-title">Points for Majority</th>
+            <th class="row-title">Special Movement Ability</th>
+          </tr>
+          <tr>
+            <th><div class="help-token" data-token-type="owl"></div></th>
+            <th>1</th>
+            <th>1</th>
+            <th class="information-cell">Move to any tile.</th>
+          </tr>
+          <tr>
+            <th><div class="help-token" data-token-type="water"></div></th> 
+            <th>3</th>
+            <th>3</th>
+            <th class="information-cell">Move any number of spaced in any direction including diagonal.</th>
+          </tr>
+          <tr>
+            <th><div class="help-token" data-token-type="tree"></div></th>
+            <th>5</th>
+            <th>5</th>
+            <th class="information-cell">Move one space diagonally.</th>
+          </tr>
+          <tr>            
+            <th><div class="help-token" data-token-type="horse"></div></th>
+            <th>7</th>
+            <th>7</th>
+            <th class="information-cell">Move in an <b>L</b> pattern.</th>
+          </tr>
+          <tr>            
+            <th><div class="help-token" data-token-type="sun"></div></th>
+            <th>9</th>
+            <th>9</th>
+            <th class="information-cell">Move to one of the four corners on the board.</th>
+          </tr>
+        </table>
+      `;
+    },
+    iyeTilePointsAndDistributionTable: function () {
       return `
         <table class="token-distribution-table">
           <tr>
@@ -617,27 +687,8 @@ define([
             <td>5</td>
             <td>3</td>
             <td>1</td>
-          </tr>
+          </tr> 
         </table>
-      `;
-    },
-    naturalMovementHelpSection: function () {
-      const naturalMovementDescription = _(
-        "On the active player's turn, they can always move the KAM token 1 or 2 spaces orthogonally. This movement is always available and preferred when there is a valid target. There is no cost for this type of movement."
-      );
-      return `
-        <div class="game-help-section">
-          <span class="title">${_("Natural KAM Movement")}</span>
-          <span class="description">${naturalMovementDescription}</span>
-        </div>
-      `;
-    },
-    iyeMovementHelpSection: function () {
-      return `
-        <div class="game-help-section">
-          <span class="title">${_("IYE Based KAM Movement")}</span>
-          <span class="description">This section is TODO</span>
-        </div>
       `;
     },
 
