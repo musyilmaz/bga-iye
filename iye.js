@@ -54,7 +54,9 @@ define([
         tokenTypes
       );
       this.setupGameInformationPanel(
-        tokenState.board.filter((t) => t.type !== "kam"),
+        tokenState && tokenState.board
+          ? tokenState.board.filter((t) => t.type !== "kam")
+          : [],
         tokenTypes
       );
       this.setupGameBoard(gamedatas.materialInfo.board);
@@ -126,7 +128,7 @@ define([
             break;
           }
           case ROUND_END_CONFIRMATION: {
-            this.actionButttonsRoundEndConfirmation(args);
+            this.actionButtonsRoundEndConfirmation(args);
             break;
           }
         }
@@ -141,11 +143,11 @@ define([
       playerRoundScores,
       tokenTypes
     ) {
-      for (playerId in players) {
+      for (let playerId in players) {
         const playerTokens = {};
 
         Object.values(tokenTypes).map((token) => {
-          const tokens = playerTokenState.filter(
+          const tokens = (playerTokenState || []).filter(
             (pts) => pts.player === playerId && pts.type === token.type
           );
 
@@ -155,7 +157,7 @@ define([
           };
         });
 
-        const roundScore = playerRoundScores.filter(
+        const roundScore = (playerRoundScores || []).filter(
           (prs) => prs.winner === playerId
         ).length;
 
@@ -227,17 +229,24 @@ define([
     setupTokens: function (gamedatas) {
       const { tokenState, players, materialInfo } = gamedatas;
 
-      tokenState["board"].map((token) => {
-        this.placeTokenOnBoard(token);
-      });
+      if (tokenState && tokenState.board && Array.isArray(tokenState.board)) {
+        tokenState.board.map((token) => {
+          this.placeTokenOnBoard(token);
+        });
+      }
     },
     clearTokens: function () {
       const tokens = document.getElementById("iye_tokens");
-      tokens.innerHTML = null;
+      if (tokens) {
+        tokens.innerHTML = null;
+      }
     },
     placeTokenOnBoard: function (token) {
+      if (!token) return;
+
       const { x, y, type } = token;
       const tokens = document.getElementById("iye_tokens");
+      if (!tokens) return;
 
       if (type === "kam") {
         tokens.insertAdjacentHTML(
@@ -324,11 +333,15 @@ define([
     moveKamToCoordinate: function (x, y) {
       const targetSquare = document.getElementById(`square_${x}_${y}`);
       const kamToken = document.getElementsByClassName("kam")[0];
-      this.slideToObject(kamToken, targetSquare).play();
+      if (kamToken && targetSquare) {
+        this.slideToObject(kamToken, targetSquare).play();
+      }
     },
     moveKamToTargetSquare: function (targetSquare) {
       const kamToken = document.getElementsByClassName("kam")[0];
-      this.slideToObject(kamToken, targetSquare).play();
+      if (kamToken && targetSquare) {
+        this.slideToObject(kamToken, targetSquare).play();
+      }
     },
     fadeOutAndDestroyToken: function (x, y) {
       const targetToken = document.getElementById(`token_${x}_${y}`);
@@ -420,7 +433,7 @@ define([
         "gray"
       );
     },
-    actionButttonsRoundEndConfirmation: function (args) {
+    actionButtonsRoundEndConfirmation: function (args) {
       this.addActionButton("confirm_round_end", _("Confirm Round End"), () =>
         this.bgaPerformAction("actRoundEndConfirmation", {})
       );
@@ -472,7 +485,9 @@ define([
         tokenTypes
       );
       this.setupGameInformationPanel(
-        tokenState.board.filter((t) => t.type !== "kam"),
+        tokenState && tokenState.board
+          ? tokenState.board.filter((t) => t.type !== "kam")
+          : [],
         tokenTypes
       );
       this.clearTokens();
@@ -491,7 +506,7 @@ define([
       } = notification.args;
 
       // Remove possible moves from previous state
-      if (this.isCurrentPlayerActive) {
+      if (this.isCurrentPlayerActive()) {
         document.querySelectorAll(".possible_coordinate").forEach((div) => {
           div.removeEventListener("click", null);
           div.classList.remove("possible_coordinate");
@@ -518,7 +533,9 @@ define([
         tokenTypes
       );
       this.setupGameInformationPanel(
-        tokenState.board.filter((t) => t.type !== "kam"),
+        tokenState && tokenState.board
+          ? tokenState.board.filter((t) => t.type !== "kam")
+          : [],
         tokenTypes
       );
       this.updatePlayerScores(playerScores);
@@ -718,7 +735,7 @@ define([
       switch (key) {
         case "logSpentToken":
         case "logTargetToken": {
-          return `<div class="log_token" data-token-type=${args[key]}></div>`;
+          return `<div class="log_token" data-token-type="${args[key]}"></div>`;
         }
       }
     },

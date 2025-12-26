@@ -355,7 +355,12 @@ class iye extends Table
         $possible_kam_movements = $this->getPossibleKamMovements(intval($this->getActivePlayerId()));
         $token_board_state = $this->getTokenBoardStateFromDB();
 
-        if (empty($possible_kam_movements) || count($token_board_state) === 1) {
+        // Game ends with point-based scoring when only 1 tile remains (24th action)
+        if (count($token_board_state) === 1) {
+            $this->gamestate->nextState("prepareRoundEnd");
+        }
+        // Game ends with valid movement condition when player has no moves (actions 1-23)
+        elseif (empty($possible_kam_movements)) {
             $this->gamestate->nextState("prepareRoundEnd");
         } else {
             $this->gamestate->nextState("nextTurn");
@@ -1016,19 +1021,7 @@ class iye extends Table
         $possible_kam_movements = $this->getPossibleKamMovements(intval($active_player_id));
         $token_board_state = $this->getTokenBoardStateFromDB();
 
-        if (empty($possible_kam_movements)) {
-            $this->notifyAllPlayers(
-                "roundEndWithNoPossibleMovement",
-                clienttranslate('Round ended with running out of possible movements, ${winnerName} won the round!'),
-                array(
-                    'loserName' => $this->getActivePlayerName(),
-                    'winnerName' => $this->getPlayerNameById($this->getOpponentId($active_player_id))
-                )
-            );
-
-            $this->setStat(0, "howRoundEnded");
-        }
-
+        // If only 1 tile left (24th action), always do point-based scoring
         if (count($token_board_state) === 1) {
             $opponent_id = $this->getOpponentId($active_player_id);
             $active_player_score = $this->getPlayerScoreFromDB($active_player_id);
@@ -1057,6 +1050,19 @@ class iye extends Table
             );
 
             $this->setStat(1, "howRoundEnded");
+        }
+        // If no possible moves (valid movement condition, actions 1-23)
+        elseif (empty($possible_kam_movements)) {
+            $this->notifyAllPlayers(
+                "roundEndWithNoPossibleMovement",
+                clienttranslate('Round ended with running out of possible movements, ${winnerName} won the round!'),
+                array(
+                    'loserName' => $this->getActivePlayerName(),
+                    'winnerName' => $this->getPlayerNameById($this->getOpponentId($active_player_id))
+                )
+            );
+
+            $this->setStat(0, "howRoundEnded");
         }
     }
 
